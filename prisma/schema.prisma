@@ -1,0 +1,70 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model CustomerProfile {
+  id                 String      @id @default(cuid())
+  firstName          String
+  lastName           String
+  gender             String
+  dob                String
+  age                Int
+  height             Int
+  languages          String      // JSON array string
+  religion           String
+  caste              String
+  maritalStatus      String
+  email              String
+  phone              String
+  country            String
+  city               String
+
+  // Nested structures stored as JSON strings
+  education          String      // JSON string of EducationInfo
+  career             String      // JSON string of CareerInfo
+  preferences        String      // JSON string of CustomerPreferences
+  familyInfo         String      // JSON string of FamilyInfo
+
+  status             String
+  assignedMatchmaker String
+  lastActivity       String
+  notes              MatchNote[]
+  savedMatches       String      // JSON array string of saved match IDs
+  sentMatches        String      // JSON array string of sent match IDs
+  imageUrl           String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+}
+
+model MatchNote {
+  id            String          @id @default(cuid())
+  profileId     String
+  date          String          // ISO string
+  author        String
+  content       String
+  isAiGenerated Boolean         @default(false)
+  profile       CustomerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model ActivityUpdate {
+  id          String   @id @default(cuid())
+  timestamp   String   // ISO string
+  profileId   String
+  profileName String
+  type        String
+  message     String
+  details     String?
+}
+
+model MatchmakerAccount {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      String   @default("Matchmaking Consultant")
+  createdAt DateTime @default(now())
+}
