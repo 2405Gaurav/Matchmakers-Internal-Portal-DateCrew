@@ -92,14 +92,15 @@ export default function SignInPage() {
       {/* Left — branded panel (desktop) */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden">
         {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1516589174184-c6852651428c?q=80&w=1974&auto=format&fit=crop" 
-            alt="Romance and Connection"
-            className="w-full h-full object-cover opacity-40 mix-blend-overlay"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#181410] via-[#181410]/40 to-transparent" />
-        </div>
+       {/* Background Image */}
+<div className="absolute inset-0 z-0">
+  <img 
+    src="https://images.unsplash.com/photo-1529543544282-ea669407fca3?w=1200&auto=format&fit=crop&q=80"
+    alt="Premium matchmaking"
+    className="w-full h-full object-cover opacity-50"
+  />
+  <div className="absolute inset-0 bg-gradient-to-t from-[#181410] via-[#181410]/60 to-[#181410]/20" />
+</div>
 
         {/* Gradient ribbon top strip */}
         <div className="absolute top-0 inset-x-0 h-1 gradient-ribbon z-10" />
