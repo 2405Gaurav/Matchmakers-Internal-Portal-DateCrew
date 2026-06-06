@@ -3,6 +3,7 @@
 import React, { useState, use } from "react";
 import { useCRMStore } from "@/store/crmStore";
 import { exportProfileToPdf } from "@/utils/pdfExport";
+import { buildGeminiRequestHeaders } from "@/utils/geminiClient";
 import { ProfileStatus } from "@/types/crm";
 import { useRouter } from "next/navigation";
 import {
@@ -96,7 +97,10 @@ export default function CustomerProfilePage({
     try {
       const res = await fetch("/api/ai/summary", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...buildGeminiRequestHeaders()
+        },
         body: JSON.stringify({ profile })
       });
 

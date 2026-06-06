@@ -59,7 +59,7 @@ export default function CustomersPage() {
     designation: "Software Engineer",
     income: 18,
     industry: "Technology",
-    assignedMatchmaker: "Meera Sharma",
+    assignedMatchmaker: "Gaurav",
     status: "New Lead" as ProfileStatus
   });
 

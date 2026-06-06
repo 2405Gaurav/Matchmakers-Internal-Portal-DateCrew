@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
+import bcrypt from "bcrypt";
 import fs from "fs";
 import path from "path";
+import { DEFAULT_GEMINI_MODEL, getBackendGeminiApiKey, getGeminiModel, getGeminiTemperature } from "@/utils/gemini";
+import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+
+const DEFAULT_MATCHMAKER_EMAIL = "gaurav123@tdc.com";
 
 // Helper to read and parse the .env file
 function getEnvVariables() {
@@ -63,13 +68,18 @@ function updateEnvFile(updates: Record<string, string>) {
 export async function GET() {
   try {
     const env = getEnvVariables();
+    const matchmaker = await prisma.matchmakerAccount.findUnique({
+      where: { email: DEFAULT_MATCHMAKER_EMAIL },
+    });
+
     return NextResponse.json({
-      apiKey: env.GROQ_API_KEY || "",
-      aiModel: env.GROQ_MODEL || "llama-3.3-70b-versatile",
-      temperature: parseFloat(env.GROQ_TEMPERATURE || "0.7"),
-      profileName: env.PORTAL_NAME || "Meera Sharma",
-      profileRole: env.PORTAL_ROLE || "Senior Matchmaking Director",
-      portalPassword: env.PORTAL_PASSWORD || "admin123",
+      backendApiKeyConfigured: Boolean(getBackendGeminiApiKey(env)),
+      backendApiKeyVariable: env.GEMINI_API_KEY ? "GEMINI_API_KEY" : env.GEMINI_API ? "GEMINI_API" : "GEMINI_API_KEY",
+      aiModel: getGeminiModel(env),
+      temperature: getGeminiTemperature(0.7, env),
+      profileName: matchmaker?.name || "Gaurav Thakur",
+      profileRole: matchmaker?.role || "Fullstack Developer",
+      profileEmail: matchmaker?.email || DEFAULT_MATCHMAKER_EMAIL,
       emailAlerts: env.NOTIFICATION_EMAIL_ALERTS !== "false",
       pushNotes: env.NOTIFICATION_PUSH_NOTES !== "false",
       weeklyDigest: env.NOTIFICATION_WEEKLY_DIGESTS === "true"
@@ -83,20 +93,61 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const updates: Record<string, string> = {};
+    const targetEmail = body.email || DEFAULT_MATCHMAKER_EMAIL;
 
-    if (body.apiKey !== undefined) updates.GROQ_API_KEY = body.apiKey;
-    if (body.aiModel !== undefined) updates.GROQ_MODEL = body.aiModel;
-    if (body.temperature !== undefined) updates.GROQ_TEMPERATURE = String(body.temperature);
-    if (body.profileName !== undefined) updates.PORTAL_NAME = body.profileName;
-    if (body.profileRole !== undefined) updates.PORTAL_ROLE = body.profileRole;
-    if (body.portalPassword !== undefined) updates.PORTAL_PASSWORD = body.portalPassword;
+    if (body.backendApiKey !== undefined) updates.GEMINI_API_KEY = body.backendApiKey;
+    if (body.apiKey !== undefined) updates.GEMINI_API_KEY = body.apiKey;
+    if (body.aiModel !== undefined) updates.GEMINI_MODEL = body.aiModel || DEFAULT_GEMINI_MODEL;
+    if (body.temperature !== undefined) updates.GEMINI_TEMPERATURE = String(body.temperature);
     if (body.emailAlerts !== undefined) updates.NOTIFICATION_EMAIL_ALERTS = String(body.emailAlerts);
     if (body.pushNotes !== undefined) updates.NOTIFICATION_PUSH_NOTES = String(body.pushNotes);
     if (body.weeklyDigest !== undefined) updates.NOTIFICATION_WEEKLY_DIGESTS = String(body.weeklyDigest);
 
-    updateEnvFile(updates);
+    if (Object.keys(updates).length > 0) {
+      updateEnvFile(updates);
+    }
 
-    return NextResponse.json({ success: true, message: "Settings updated in .env successfully" });
+    if (body.profileName !== undefined || body.profileRole !== undefined) {
+      await prisma.matchmakerAccount.update({
+        where: { email: targetEmail },
+        data: {
+          ...(body.profileName !== undefined ? { name: body.profileName } : {}),
+          ...(body.profileRole !== undefined ? { role: body.profileRole } : {}),
+        },
+      });
+    }
+
+    if (body.portalPassword !== undefined) {
+      const currentPassword = String(body.currentPassword || "");
+      const nextPassword = String(body.portalPassword || "");
+
+      if (!currentPassword || !nextPassword) {
+        return NextResponse.json({ error: "Current and new passwords are required." }, { status: 400 });
+      }
+
+      const account = await prisma.matchmakerAccount.findUnique({
+        where: { email: targetEmail },
+      });
+
+      if (!account) {
+        return NextResponse.json({ error: "Matchmaker account not found." }, { status: 404 });
+      }
+
+      const isCurrentPasswordValid = await bcrypt.compare(currentPassword, account.password);
+
+      if (!isCurrentPasswordValid) {
+        return NextResponse.json({ error: "Current password is incorrect." }, { status: 400 });
+      }
+
+      const passwordHash = await bcrypt.hash(nextPassword, 10);
+
+      await prisma.matchmakerAccount.update({
+        where: { email: targetEmail },
+        data: { password: passwordHash },
+      });
+    }
+
+    return NextResponse.json({ success: true, message: "Settings updated successfully." });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to save settings" }, { status: 500 });
   }

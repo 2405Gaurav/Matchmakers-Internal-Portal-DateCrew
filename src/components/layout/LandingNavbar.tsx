@@ -7,16 +7,20 @@ import { useRouter } from "next/navigation";
 import { Heart, ArrowRight, Menu, X } from "lucide-react";
 import { useCRMStore } from "@/store/crmStore";
 
+// The LandingNavbar: A floating, pill-shaped navigation for our landing page
 export function LandingNavbar() {
   const router = useRouter();
   const { session } = useCRMStore();
+  
+  // State to track if the user has scrolled down
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  
   // Defer auth-conditional rendering to client to avoid hydration mismatch.
-  // Server always renders the unauthenticated state; client updates after mount.
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
 
+  // Listen for scroll events to change the navbar's appearance
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -25,12 +29,6 @@ export function LandingNavbar() {
 
   return (
     <>
-      {/*
-        ── Rounded Pill Navbar (as requested) ─────────────────────────
-        Full-width fixed wrapper with pointer-events-none so only the
-        pill itself intercepts clicks. Centered with flex justify-center.
-        Stripe Modern colors: white fill, gray border, violet CTA.
-      */}
       <motion.div
         initial={{ y: -32, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -46,33 +44,28 @@ export function LandingNavbar() {
         >
           <div className="flex items-center justify-between px-5 py-2.5">
 
-            {/* ── Left: Logo + Brand ─────────────────────────────── */}
+            {/* --- Left: Logo + Brand --- */}
             <Link href="/" className="flex items-center gap-2.5 group select-none shrink-0">
               <motion.div
                 whileHover={{ scale: 1.08 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-sm-primary shadow-sm"
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-500"
               >
                 <Heart className="w-3.5 h-3.5 text-white fill-white" />
               </motion.div>
-              <span className="font-sans font-semibold text-[14px] text-gray-900 tracking-tight whitespace-nowrap hidden sm:block">
-                TDC matchmakers manage
+              <span className="font-display text-[18px] text-foreground tracking-tight whitespace-nowrap hidden sm:block transition-colors duration-300">
+                The Date Crew
               </span>
             </Link>
 
-            {/* ── Center: Nav links (desktop) ─────────────────────── */}
-            <div className="hidden md:flex items-center gap-1">
-              <Link href="#features"   className="px-3 py-1.5 rounded-full text-[14px] font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors">Features</Link>
-              <Link href="#analytics"  className="px-3 py-1.5 rounded-full text-[14px] font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors">Analytics</Link>
-              <Link href="#security"   className="px-3 py-1.5 rounded-full text-[14px] font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors">Security</Link>
-            </div>
 
-            {/* ── Right: Auth CTAs (client-only to avoid hydration mismatch) ── */}
+            {/* --- Right: Auth CTAs --- */}
             <div className="hidden sm:flex items-center gap-2 shrink-0">
+              {/* Only show the dashboard button if the user is already logged in */}
               {isMounted && session.isAuthenticated ? (
                 <button
                   onClick={() => router.push("/dashboard")}
-                  className="flex items-center gap-1.5 btn-primary h-9 px-4 text-[13px] rounded-full"
+                  className="flex items-center gap-1.5 btn-primary px-5 text-[15px]"
                 >
                   Dashboard
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -81,26 +74,19 @@ export function LandingNavbar() {
                 <>
                   <Link
                     href="/sign-in"
-                    className="px-4 py-2 text-[14px] font-medium text-gray-700 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors"
+                    className="px-4 py-2 text-[15px] font-light text-foreground/75 hover:text-foreground rounded-full hover:bg-input transition-colors"
                   >
                     Sign In
-                  </Link>
-                  <Link
-                    href="/sign-up"
-                    className="flex items-center gap-1.5 btn-primary h-9 px-4 text-[13px] rounded-full"
-                  >
-                    Sign Up
-                    <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </>
               )}
             </div>
 
-            {/* ── Mobile hamburger ────────────────────────────────── */}
+            {/* --- Mobile hamburger menu --- */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Toggle menu"
-              className="sm:hidden p-1.5 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
+              className="sm:hidden p-1.5 rounded-full text-foreground/60 hover:bg-input transition-colors"
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -116,14 +102,13 @@ export function LandingNavbar() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
             transition={{ duration: 0.18 }}
-            className="fixed top-20 left-4 right-4 z-40 bg-white rounded-2xl border border-gray-200 shadow-lg p-4 flex flex-col gap-1.5"
+            className="fixed top-20 left-4 right-4 z-40 bg-card-bg rounded-2xl border border-border shadow-lg p-4 flex flex-col gap-1.5 transition-colors duration-300"
           >
-            <Link href="#features"  onClick={() => setMobileOpen(false)} className="px-3 py-2.5 rounded-lg text-[14px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">Features</Link>
-            <Link href="#analytics" onClick={() => setMobileOpen(false)} className="px-3 py-2.5 rounded-lg text-[14px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">Analytics</Link>
-            <Link href="#security"  onClick={() => setMobileOpen(false)} className="px-3 py-2.5 rounded-lg text-[14px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">Security</Link>
-            <div className="border-t border-gray-100 my-1" />
-            <Link href="/sign-in"   onClick={() => setMobileOpen(false)} className="px-3 py-2.5 rounded-lg text-[14px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">Sign In</Link>
-            <Link href="/sign-up"   onClick={() => setMobileOpen(false)} className="btn-primary w-full justify-center rounded-xl mt-1 text-[14px]">Get started →</Link>
+            <Link href="#features"  onClick={() => setMobileOpen(false)} className="px-3 py-2.5 rounded-lg text-[14px] font-medium text-foreground/75 hover:bg-input transition-colors">Features</Link>
+            <Link href="#analytics" onClick={() => setMobileOpen(false)} className="px-3 py-2.5 rounded-lg text-[14px] font-medium text-foreground/75 hover:bg-input transition-colors">Analytics</Link>
+            <Link href="#security"  onClick={() => setMobileOpen(false)} className="px-3 py-2.5 rounded-lg text-[14px] font-medium text-foreground/75 hover:bg-input transition-colors">Security</Link>
+            <div className="border-t border-border my-1" />
+            <Link href="/sign-in"   onClick={() => setMobileOpen(false)} className="px-3 py-2.5 rounded-lg text-[14px] font-medium text-foreground/75 hover:bg-input transition-colors">Sign In</Link>
           </motion.div>
         )}
       </AnimatePresence>

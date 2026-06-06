@@ -18,7 +18,7 @@ const maleFirstNames = [
 ];
 
 const femaleFirstNames = [
-  "Priya", "Neha", "Ananya", "Sneha", "Shruti", "Riya", "Aisha", "Kiara", "Meera", "Pooja",
+  "Priya", "Neha", "Ananya", "Sneha", "Shruti", "Riya", "Aisha", "Kiara", "Prachi", "Pooja",
   "Divya", "Aditi", "Tanvi", "Kavya", "Ishita", "Naina", "Simran", "Geeta", "Swati", "Shreya",
   "Deepa", "Payal", "Preeti", "Sonia", "Ritu", "Meenakshi", "Sunita", "Radhika", "Shweta", "Aarti",
   "Mansi", "Nikita", "Richa", "Pallavi", "Kanika", "Jyoti", "Vandana", "Sapna", "Kiran", "Nisha",
@@ -67,7 +67,7 @@ const designations = [
 
 const industries = ["Technology", "Finance", "Healthcare", "Consulting", "Entrepreneurship", "Legal", "Design", "Conglomerate"];
 
-const matchmakers = ["Meera Sharma", "Rahul Verma", "Priya Iyer", "Sanjay Nair"];
+const matchmakers = ["Gaurav", "Rahul Verma", "Priya Iyer", "Sanjay Nair"];
 
 
 
@@ -118,7 +118,7 @@ export function generateMockProfiles(): CustomerProfile[] {
     const profileLanguages = ["English", ...nativeLangs];
 
     // Contact
-    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`;
+   const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}.${i}@example.com`;
     const phone = `+91 ${randRange(70000, 99999)} ${randRange(10000, 99999)}`;
     const city = pick(cities);
 

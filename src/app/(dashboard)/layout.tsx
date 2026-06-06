@@ -10,8 +10,9 @@ import { Loader2 } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { session, isSidebarCollapsed, fetchInitialData } = useCRMStore();
+  const { session, isSidebarCollapsed, isSidebarHovered, fetchInitialData } = useCRMStore();
   const [isMounted, setIsMounted] = useState(false);
+  const isSidebarExpanded = !isSidebarCollapsed || isSidebarHovered;
 
   useEffect(() => { setIsMounted(true); }, []);
 
@@ -25,7 +26,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!isMounted || !session.isAuthenticated) {
     return (
-      <div className="min-h-screen w-screen flex flex-col items-center justify-center bg-hn-secondary text-hn-primary">
+      <div className="min-h-screen w-screen flex flex-col items-center justify-center bg-background text-foreground transition-colors duration-300">
         <Loader2 className="w-8 h-8 animate-spin text-hn-primary/40 mb-3" />
         <p className="font-body text-label-sm text-hn-primary/35">Verifying session...</p>
       </div>
@@ -33,12 +34,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="min-h-screen w-screen bg-hn-secondary text-hn-primary relative">
+    <div className="min-h-screen w-screen bg-background text-foreground relative transition-colors duration-300">
       <Sidebar />
 
       <div
         className="flex flex-col min-h-screen transition-all duration-300"
-        style={{ paddingLeft: isSidebarCollapsed ? "72px" : "240px" }}
+        style={{ paddingLeft: isSidebarExpanded ? "260px" : "76px" }}
       >
         <DashboardNavbar />
 

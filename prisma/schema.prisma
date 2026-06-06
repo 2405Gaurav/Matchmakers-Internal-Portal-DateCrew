@@ -1,10 +1,11 @@
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+ 
 }
 
 model CustomerProfile {
@@ -15,28 +16,25 @@ model CustomerProfile {
   dob                String
   age                Int
   height             Int
-  languages          String      // JSON array string
+  languages          Json
   religion           String
   caste              String
   maritalStatus      String
-  email              String
+  email              String      @unique
   phone              String
   country            String
   city               String
-
-  // Nested structures stored as JSON strings
-  education          String      // JSON string of EducationInfo
-  career             String      // JSON string of CareerInfo
-  preferences        String      // JSON string of CustomerPreferences
-  familyInfo         String      // JSON string of FamilyInfo
-
+  education          Json
+  career             Json
+  preferences        Json
+  familyInfo         Json
   status             String
   assignedMatchmaker String
   lastActivity       String
-  notes              MatchNote[]
-  savedMatches       String      // JSON array string of saved match IDs
-  sentMatches        String      // JSON array string of sent match IDs
+  savedMatches       Json
+  sentMatches        Json
   imageUrl           String?
+  notes              MatchNote[]
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
 }
@@ -44,26 +42,30 @@ model CustomerProfile {
 model MatchNote {
   id            String          @id @default(cuid())
   profileId     String
-  date          String          // ISO string
+  date          String
   author        String
   content       String
   isAiGenerated Boolean         @default(false)
   profile       CustomerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
 }
 
 model ActivityUpdate {
   id          String   @id @default(cuid())
-  timestamp   String   // ISO string
+  timestamp   String
   profileId   String
   profileName String
   type        String
   message     String
   details     String?
+  createdAt   DateTime @default(now())
 }
 
 model MatchmakerAccount {
   id        String   @id @default(cuid())
   email     String   @unique
+  password  String
   name      String
   role      String   @default("Matchmaking Consultant")
   createdAt DateTime @default(now())

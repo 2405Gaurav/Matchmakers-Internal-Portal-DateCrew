@@ -11,6 +11,7 @@ interface CRMState {
   activeSidebarTab: string;
   theme: "dark" | "light";
   isSidebarCollapsed: boolean;
+  isSidebarHovered: boolean;
   quickActionsOpen: boolean;
 
   // Actions
@@ -25,6 +26,7 @@ interface CRMState {
   setTheme: (theme: "dark" | "light") => void;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
+  setSidebarHovered: (hovered: boolean) => void;
   toggleQuickActions: (open?: boolean) => void;
   updateProfileStatus: (profileId: string, status: ProfileStatus) => Promise<void>;
   addNote: (profileId: string, content: string, isAi?: boolean) => Promise<void>;
@@ -44,35 +46,52 @@ const getSavedSession = () => {
   }
   return {
     email: "",
-    name: "",
-    role: "",
+    name: "Gaurav Thakur",
+    role: "Matchmaking Consultant",
     isAuthenticated: false
   };
 };
 
+// This is the brain of our CRM - where we keep track of everything from profiles to theme settings
 export const useCRMStore = create<CRMState>((set, get) => {
-  // Theme helper
+  let themeTransitionTimeout: ReturnType<typeof setTimeout> | undefined;
+
+  // Helper to switch the visual theme (dark/light) smoothly across the app
   const updateDOMTheme = (theme: "dark" | "light") => {
     if (typeof window !== "undefined") {
       const root = window.document.documentElement;
-      // Always enforce light theme per user request
-      if (theme === "dark" || theme === "light") {
-        root.classList.remove("dark");
-        localStorage.setItem("tdc-crm-theme", "light");
+      root.classList.add("theme-transition");
+      root.classList.toggle("dark", theme === "dark");
+      root.style.colorScheme = theme;
+      localStorage.setItem("tdc-crm-theme", theme);
+
+      // Clean up the transition class after the animation is done
+      if (themeTransitionTimeout) {
+        clearTimeout(themeTransitionTimeout);
       }
+
+      themeTransitionTimeout = setTimeout(() => {
+        root.classList.remove("theme-transition");
+      }, 250);
     }
   };
 
-  // Get initial theme
+  // Figure out what theme we should start with when the app loads
   const getInitialTheme = (): "dark" | "light" => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("tdc-crm-theme", "light");
-      return "light";
+      const savedTheme = localStorage.getItem("tdc-crm-theme");
+      if (savedTheme === "dark" || savedTheme === "light") {
+        return savedTheme;
+      }
+
+      // If no preference is saved, follow the user's system settings
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     }
-    return "light"; // Default server side
+    return "light";
   };
 
   return {
+    // Initial state values - mostly empty or defaults until we load real data
     profiles: [],
     session: getSavedSession(),
     notifications: [],
@@ -81,9 +100,11 @@ export const useCRMStore = create<CRMState>((set, get) => {
     selectedProfileId: null,
     activeSidebarTab: "Dashboard",
     theme: getInitialTheme(),
-    isSidebarCollapsed: false,
+    isSidebarCollapsed: true,
+    isSidebarHovered: false,
     quickActionsOpen: false,
 
+    // Fetch all the initial data we need to show on the dashboard
     fetchInitialData: async () => {
       try {
         const [profilesRes, activitiesRes] = await Promise.all([
@@ -101,6 +122,7 @@ export const useCRMStore = create<CRMState>((set, get) => {
       }
     },
 
+    // Set up a new session when someone logs in
     login: (email, name, role) => {
       const session = {
         email,
@@ -114,6 +136,7 @@ export const useCRMStore = create<CRMState>((set, get) => {
       set({ session });
     },
 
+    // Clear everything out when the user logs out
     logout: () => {
       if (typeof window !== "undefined") {
         localStorage.removeItem("tdc-crm-session");
@@ -126,18 +149,19 @@ export const useCRMStore = create<CRMState>((set, get) => {
           isAuthenticated: false
         },
         activeSidebarTab: "Dashboard",
-        selectedProfileId: null
+        selectedProfileId: null,
+        isSidebarCollapsed: true,
+        isSidebarHovered: false
       });
     },
 
+    // Simple setters for various UI states
     selectProfile: (id) => set({ selectedProfileId: id }),
-
     setSidebarTab: (tab) => set({ activeSidebarTab: tab }),
-
     setSearchQuery: (query) => set({ searchQuery: query }),
-
     setAiSearchQuery: (query) => set({ aiSearchQuery: query }),
 
+    // Theme toggling logic
     toggleTheme: () => {
       const current = get().theme;
       const next = current === "dark" ? "light" : "dark";
@@ -150,10 +174,12 @@ export const useCRMStore = create<CRMState>((set, get) => {
       updateDOMTheme(theme);
     },
 
+    // Sidebar expansion/collapse controls
     toggleSidebar: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
-
     setSidebarCollapsed: (collapsed) => set({ isSidebarCollapsed: collapsed }),
+    setSidebarHovered: (hovered) => set({ isSidebarHovered: hovered }),
 
+    // Controls for the command palette/quick actions search
     toggleQuickActions: (open) => set((state) => ({ 
       quickActionsOpen: open !== undefined ? open : !state.quickActionsOpen 
     })),

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useCRMStore } from "@/store/crmStore";
+import { DEFAULT_GEMINI_MODEL } from "@/utils/geminiConfig";
+import { getStoredGeminiPreferences, saveGeminiPreferences } from "@/utils/geminiClient";
 import {
   Settings,
   User,
@@ -11,21 +13,26 @@ import {
   Save,
   CheckCircle,
   Eye,
-  EyeOff
+  EyeOff,
+  KeyRound
 } from "lucide-react";
 
 export default function SettingsPage() {
   const { session, login } = useCRMStore();
 
   // Form states
-  const [profileName, setProfileName] = useState(session.name || "Meera Sharma");
-  const [profileRole, setProfileRole] = useState(session.role || "Senior Matchmaking Director");
+  const [profileName, setProfileName] = useState(session.name || "Gaurav Thakur");
+  const [profileRole, setProfileRole] = useState(session.role || "Fullstack Developer");
   
   // AI Config states
-  const [aiModel, setAiModel] = useState("llama-3.3-70b-versatile");
-  const [apiKey, setApiKey] = useState("");
-  const [showApiKey, setShowApiKey] = useState(false);
+  const [aiModel, setAiModel] = useState(DEFAULT_GEMINI_MODEL);
+  const [personalApiKey, setPersonalApiKey] = useState("");
+  const [showPersonalApiKey, setShowPersonalApiKey] = useState(false);
   const [temperature, setTemperature] = useState(0.7);
+  const [keySource, setKeySource] = useState<"backend" | "personal">("backend");
+  const [allowBackendFallback, setAllowBackendFallback] = useState(true);
+  const [backendApiKeyConfigured, setBackendApiKeyConfigured] = useState(false);
+  const [backendApiKeyVariable, setBackendApiKeyVariable] = useState("GEMINI_API_KEY");
 
   // Notification states
   const [emailAlerts, setEmailAlerts] = useState(true);
@@ -47,13 +54,19 @@ export default function SettingsPage() {
         if (data.profileName) setProfileName(data.profileName);
         if (data.profileRole) setProfileRole(data.profileRole);
         if (data.aiModel) setAiModel(data.aiModel);
-        if (data.apiKey) setApiKey(data.apiKey);
         if (data.temperature !== undefined) setTemperature(data.temperature);
+        if (data.backendApiKeyConfigured !== undefined) setBackendApiKeyConfigured(data.backendApiKeyConfigured);
+        if (data.backendApiKeyVariable) setBackendApiKeyVariable(data.backendApiKeyVariable);
         if (data.emailAlerts !== undefined) setEmailAlerts(data.emailAlerts);
         if (data.pushNotes !== undefined) setPushNotes(data.pushNotes);
         if (data.weeklyDigest !== undefined) setWeeklyDigest(data.weeklyDigest);
       })
       .catch((err) => console.error("Error loading settings:", err));
+
+    const storedPreferences = getStoredGeminiPreferences();
+    setPersonalApiKey(storedPreferences.personalApiKey);
+    setKeySource(storedPreferences.keySource);
+    setAllowBackendFallback(storedPreferences.allowBackendFallback);
   }, []);
 
   const handleProfileSave = async (e: React.FormEvent) => {
@@ -86,11 +99,15 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           aiModel,
-          apiKey,
           temperature
         })
       });
       if (res.ok) {
+        saveGeminiPreferences({
+          allowBackendFallback,
+          keySource,
+          personalApiKey
+        });
         showToast("AI configuration settings updated successfully.");
       } else {
         showToast("Failed to update AI settings.");
@@ -127,23 +144,17 @@ export default function SettingsPage() {
     }
 
     try {
-      // Validate current password
-      const getRes = await fetch("/api/settings");
-      const currentSettings = await getRes.json();
-      const actualPassword = currentSettings.portalPassword || "admin123";
-
-      if (currentPassword !== actualPassword) {
-        showToast("Current password is incorrect.");
-        return;
-      }
-
       const res = await fetch("/api/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          email: session.email || "gaurav123@tdc.com",
+          currentPassword,
           portalPassword: newPassword
         })
       });
+
+      const data = await res.json();
 
       if (res.ok) {
         setCurrentPassword("");
@@ -151,7 +162,7 @@ export default function SettingsPage() {
         setConfirmPassword("");
         showToast("Security credentials updated successfully.");
       } else {
-        showToast("Failed to update security credentials.");
+        showToast(data.error || "Failed to update security credentials.");
       }
     } catch {
       showToast("Error updating security credentials.");
@@ -181,7 +192,7 @@ export default function SettingsPage() {
           <Settings className="w-5.5 h-5.5 text-brand-500" /> CRM Settings & Configurations
         </h1>
         <p className="text-xs text-foreground/60 mt-1">
-          Adjust portal preferences, customize AI scoring parameters, toggle UI themes, and manage user security.
+          Adjust portal preferences, configure Gemini AI behavior, and manage access plus security settings.
         </p>
       </div>
 
@@ -223,7 +234,7 @@ export default function SettingsPage() {
                 <input
                   type="email"
                   disabled
-                  value={session.email || "admin@thedatecrew.com"}
+                  value={session.email || "gaurav123@tdc.com"}
                   className="w-full p-2 rounded-lg border border-border bg-input/10 text-foreground/40 cursor-not-allowed text-xs font-medium"
                 />
               </div>
@@ -244,17 +255,27 @@ export default function SettingsPage() {
             </h3>
 
             <form onSubmit={handleAiSave} className="space-y-4 text-xs font-semibold">
+              <div className="rounded-xl border border-border bg-input/10 p-3 space-y-2">
+                <div className="flex items-center gap-2 text-foreground/85">
+                  <KeyRound className="w-4 h-4 text-brand-500" />
+                  <span>Backend Gemini key status: {backendApiKeyConfigured ? "Configured" : "Not configured"}</span>
+                </div>
+                <p className="text-[11px] font-medium text-foreground/60">
+                  The shared backend key is detected from <span className="font-bold">{backendApiKeyVariable}</span>. Personal keys are stored only in this browser.
+                </p>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-foreground/80">Groq Model Selector</label>
+                  <label className="text-foreground/80">Gemini Model</label>
                   <select
                     value={aiModel}
                     onChange={(e) => setAiModel(e.target.value)}
                     className="w-full p-2.5 rounded-lg border border-border bg-input/20 focus:outline-none focus:border-brand-500 text-xs"
                   >
-                    <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile (Recommended)</option>
-                    <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant (Fast)</option>
-                    <option value="qwen/qwen3-32b">Qwen 3 32B</option>
+                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended)</option>
+                    <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                    <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
                   </select>
                 </div>
                 <div className="space-y-1">
@@ -271,31 +292,81 @@ export default function SettingsPage() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setKeySource("backend")}
+                  className={`rounded-xl border p-3 text-left transition-colors ${
+                    keySource === "backend"
+                      ? "border-brand-500 bg-brand-500/10 text-foreground"
+                      : "border-border bg-input/10 text-foreground/70"
+                  }`}
+                >
+                  <div className="font-bold">Use backend Gemini key</div>
+                  <p className="mt-1 text-[11px] font-medium">
+                    Best for shared testing and evaluator flows without exposing your team key in the UI.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setKeySource("personal")}
+                  className={`rounded-xl border p-3 text-left transition-colors ${
+                    keySource === "personal"
+                      ? "border-brand-500 bg-brand-500/10 text-foreground"
+                      : "border-border bg-input/10 text-foreground/70"
+                  }`}
+                >
+                  <div className="font-bold">Use my personal Gemini key</div>
+                  <p className="mt-1 text-[11px] font-medium">
+                    Good for evaluator-specific usage limits while keeping the backend key as optional fallback.
+                  </p>
+                </button>
+              </div>
+
               <div className="space-y-1">
-                <label className="text-foreground/80">Groq API Key (Ready for connection)</label>
+                <label className="text-foreground/80">Personal Gemini API Key</label>
                 <div className="relative">
                   <input
-                    type={showApiKey ? "text" : "password"}
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
+                    type={showPersonalApiKey ? "text" : "password"}
+                    value={personalApiKey}
+                    onChange={(e) => setPersonalApiKey(e.target.value)}
                     className="w-full p-2.5 rounded-lg border border-border bg-input/20 focus:outline-none focus:border-brand-500 text-xs font-medium pr-10"
-                    placeholder="gsk-..."
+                    placeholder="AIza..."
                   />
                   <button
                     type="button"
-                    onClick={() => setShowApiKey(!showApiKey)}
+                    onClick={() => setShowPersonalApiKey(!showPersonalApiKey)}
                     className="absolute right-3 top-3 text-foreground/50 hover:text-foreground"
                   >
-                    {showApiKey ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
+                    {showPersonalApiKey ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
                   </button>
                 </div>
+                <p className="text-[11px] font-medium text-foreground/55">
+                  This key stays in your browser only and is sent to the backend per request when personal mode is enabled.
+                </p>
               </div>
+
+              <label className="flex items-center justify-between gap-3 rounded-xl border border-border bg-input/10 p-3 cursor-pointer select-none">
+                <div>
+                  <div className="text-foreground/85">Allow backend fallback</div>
+                  <p className="text-[11px] font-medium text-foreground/55">
+                    If your personal key is missing or fails, AI summaries and insights can fall back to the shared backend Gemini key.
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={allowBackendFallback}
+                  onChange={(e) => setAllowBackendFallback(e.target.checked)}
+                  className="w-4 h-4 rounded border-border text-brand-500 focus:ring-brand-500"
+                />
+              </label>
 
               <button
                 type="submit"
                 className="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-semibold flex items-center gap-1.5 transition-colors shadow-glow"
               >
-                <Save className="w-3.5 h-3.5" /> Save AI Keys
+                <Save className="w-3.5 h-3.5" /> Save Gemini Settings
               </button>
             </form>
           </div>

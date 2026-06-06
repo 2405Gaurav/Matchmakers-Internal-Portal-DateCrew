@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model CustomerProfile {
+  id                 String      @id @default(cuid())
+  firstName          String
+  lastName           String
+  gender             String
+  dob                String
+  age                Int
+  height             Int
+  languages          Json
+  religion           String
+  caste              String
+  maritalStatus      String
+  email              String      @unique
+  phone              String
+  country            String
+  city               String
+  education          Json
+  career             Json
+  preferences        Json
+  familyInfo         Json
+  status             String
+  assignedMatchmaker String
+  lastActivity       String
+  savedMatches       Json
+  sentMatches        Json
+  imageUrl           String?
+  notes              MatchNote[]
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+}
+
+model MatchNote {
+  id            String          @id @default(cuid())
+  profileId     String
+  date          String
+  author        String
+  content       String
+  isAiGenerated Boolean         @default(false)
+  profile       CustomerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+}
+
+model ActivityUpdate {
+  id          String   @id @default(cuid())
+  timestamp   String
+  profileId   String
+  profileName String
+  type        String
+  message     String
+  details     String?
+  createdAt   DateTime @default(now())
+}
+
+model MatchmakerAccount {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("Matchmaking Consultant")
+  createdAt DateTime @default(now())
+}

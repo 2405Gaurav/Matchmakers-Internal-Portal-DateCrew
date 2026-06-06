@@ -1,6 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useCRMStore } from "@/store/crmStore";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import Link from "next/link";
@@ -22,67 +24,75 @@ const features = [
     title: "Client Intelligence",
     desc: "Deep CRM profiles with lifestyle, career, family, and preference data — structured for precision matchmaking.",
     tag: "Profiles",
-    color: "text-violet-600",
-    bg: "bg-violet-50",
+    color: "text-amber-700",
+    bg: "bg-[#fff3e8]",
   },
   {
     icon: Sparkles,
     title: "AI Compatibility Engine",
     desc: "Algorithmic scoring with breakdown by values, lifestyle, location, and goals. Draft personalized introductions instantly.",
     tag: "AI-powered",
-    color: "text-indigo-600",
-    bg: "bg-indigo-50",
+    color: "text-teal-700",
+    bg: "bg-[#eaf7f5]",
   },
   {
     icon: BarChart3,
     title: "Performance Analytics",
     desc: "Track pipeline velocity, conversion by matchmaker, and client satisfaction metrics across your entire operation.",
     tag: "Analytics",
-    color: "text-blue-600",
-    bg: "bg-blue-50",
+    color: "text-slate-700",
+    bg: "bg-[#f1f1ea]",
   },
   {
     icon: Shield,
     title: "Verified Profiles",
     desc: "Built-in verification workflow with status stages from lead capture through engagement and marriage.",
     tag: "Trust",
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
+    color: "text-emerald-700",
+    bg: "bg-[#eef8ef]",
   },
   {
     icon: Zap,
     title: "Match Pipeline",
     desc: "Save, send, and track every proposal through the pipeline. Full history of sent and saved matches per client.",
     tag: "Pipeline",
-    color: "text-orange-600",
-    bg: "bg-orange-50",
+    color: "text-orange-700",
+    bg: "bg-[#fff4eb]",
   },
   {
     icon: Heart,
     title: "Relationship Notes",
     desc: "Collaborative notes with AI-generated meeting summaries. Keep every touchpoint documented and searchable.",
     tag: "Notes",
-    color: "text-rose-600",
-    bg: "bg-rose-50",
+    color: "text-teal-700",
+    bg: "bg-[#e8f5f3]",
   },
 ];
 
 export default function LandingPage() {
+  const router = useRouter();
+  const { session, setTheme } = useCRMStore();
+
+  // Force light mode on the landing page for that "default editorial" feel
+  useEffect(() => {
+    setTheme("light");
+  }, [setTheme]);
+
   return (
-    <main className="min-h-screen bg-white text-sm-on-surface overflow-x-hidden font-sans">
+    <main className="min-h-screen bg-background text-sm-on-surface overflow-x-hidden font-sans transition-colors duration-300">
       <LandingNavbar />
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
-      <section className="pt-40 pb-0 px-6 relative overflow-hidden">
+      <section className="pt-40 pb-4 px-6 relative overflow-hidden">
 
         {/* Gradient orbs */}
         <div className="absolute inset-x-0 top-0 h-[700px] pointer-events-none overflow-hidden">
           <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] rounded-full opacity-[0.07]"
-            style={{ background: "radial-gradient(ellipse, #533AFD 0%, transparent 70%)" }} />
-          <div className="absolute top-8 right-0 w-[700px] h-[500px] rounded-full opacity-[0.05]"
-            style={{ background: "radial-gradient(ellipse, #EC4899 0%, transparent 70%)" }} />
+            style={{ background: "radial-gradient(ellipse, #f59e0b 0%, transparent 70%)" }} />
+          <div className="absolute top-8 right-0 w-[700px] h-[500px] rounded-full opacity-[0.04]"
+            style={{ background: "radial-gradient(ellipse, #14b8a6 0%, transparent 70%)" }} />
           <div className="absolute top-8 left-0 w-[600px] h-[450px] rounded-full opacity-[0.04]"
-            style={{ background: "radial-gradient(ellipse, #22D3EE 0%, transparent 70%)" }} />
+            style={{ background: "radial-gradient(ellipse, #fb923c 0%, transparent 70%)" }} />
         </div>
 
         {/* Ribbon strip */}
@@ -97,14 +107,14 @@ export default function LandingPage() {
           >
             {/* Eyebrow badge */}
             <motion.div variants={fadeUp} className="flex justify-center">
-              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-sm-full border border-sm-tertiary text-sm-primary text-eyebrow bg-white">
+              <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-sm-full border border-sm-tertiary text-sm-primary text-eyebrow bg-card-bg transition-colors duration-300">
                 <span className="w-1.5 h-1.5 rounded-full bg-sm-primary" />
                 TDC Matchmakers · Internal Portal
               </span>
             </motion.div>
 
             {/* Headline */}
-            <motion.h1 variants={fadeUp} className="font-sans font-light text-[64px] sm:text-[80px] leading-[1.06] tracking-[-2px] text-sm-on-surface">
+            <motion.h1 variants={fadeUp} className="font-display font-light text-[54px] sm:text-[76px] leading-[1.04] tracking-[-0.02em] text-sm-on-surface">
               The infrastructure for{" "}
               <span className="gradient-text">premium matchmaking.</span>
             </motion.h1>
@@ -115,13 +125,11 @@ export default function LandingPage() {
 
             {/* CTAs */}
             <motion.div variants={fadeUp} className="flex items-center justify-center gap-4 pt-2">
-              <Link href="/sign-in" className="btn-primary text-[16px] px-6 py-3">
-                Start managing
+              <Link href="/sign-in" className="btn-primary text-[18px] px-8">
+                Enter the platform
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link href="/sign-up" className="btn-secondary text-[16px] px-6 py-3">
-                Request access
-              </Link>
+             
             </motion.div>
 
             {/* Social proof */}
@@ -142,8 +150,8 @@ export default function LandingPage() {
               width: "100vw",
             }}
           >
-            <div className="gradient-ribbon w-full h-36 sm:h-44 opacity-90 shadow-sm" />
-            <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-transparent to-white/80" />
+            <div className="gradient-ribbon w-full h-28 sm:h-36 opacity-75" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/80 transition-colors duration-300" />
           </motion.div>
         </div>
       </section>
@@ -204,7 +212,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FINAL CTA ────────────────────────────────────────────────── */}
-      <section className="py-32 px-6 border-t border-sm-border bg-[#FAFAFA]">
+      <section className="py-32 px-6 border-t border-sm-border bg-muted transition-colors duration-300">
         <div className="max-w-stripe mx-auto text-center">
           <motion.div
             initial="hidden" whileInView="show" viewport={{ once: true }}
@@ -227,16 +235,14 @@ export default function LandingPage() {
                 Sign in to portal
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link href="/sign-up" className="btn-secondary text-[16px] px-6 py-3">
-                Request access
-              </Link>
+         
             </motion.div>
           </motion.div>
         </div>
       </section>
 
       {/* ── FOOTER ───────────────────────────────────────────────────── */}
-      <footer className="border-t border-sm-border py-8 px-6 bg-white">
+      <footer className="border-t border-sm-border py-8 px-6 bg-card-bg transition-colors duration-300">
         <div className="max-w-stripe mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-sm-md bg-sm-primary flex items-center justify-center">

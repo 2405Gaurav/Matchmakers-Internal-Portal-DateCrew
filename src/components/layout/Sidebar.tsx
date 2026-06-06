@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   Users,
@@ -10,25 +10,28 @@ import {
   Notebook,
   BarChart3,
   Settings,
-  ChevronLeft,
-  ChevronRight,
-  LogOut,
 } from "lucide-react";
 import { useCRMStore } from "@/store/crmStore";
 import { useRouter } from "next/navigation";
 
+// The Sidebar component: Our main navigation anchor that stays on the left
 export function Sidebar() {
   const router = useRouter();
+  
+  // Grab what we need from our global store
   const {
     activeSidebarTab,
     setSidebarTab,
     isSidebarCollapsed,
-    toggleSidebar,
-    session,
-    logout,
+    isSidebarHovered,
+    setSidebarHovered,
     selectProfile,
   } = useCRMStore();
 
+  // The sidebar expands if it's not explicitly collapsed OR if the user is hovering over it
+  const isExpanded = !isSidebarCollapsed || isSidebarHovered;
+
+  // The list of places we can go in the dashboard
   const menuItems = [
     { name: "Dashboard",   icon: LayoutDashboard, path: "/dashboard" },
     { name: "Customers",   icon: Users,            path: "/dashboard/customers" },
@@ -36,62 +39,57 @@ export function Sidebar() {
     { name: "AI Insights", icon: Sparkles,         path: "/dashboard/insights" },
     { name: "Notes",       icon: Notebook,         path: "/dashboard/notes" },
     { name: "Analytics",   icon: BarChart3,        path: "/dashboard/analytics" },
-    { name: "Settings",    icon: Settings,         path: "/dashboard/settings" },
   ];
 
+  // When a user clicks a menu item, we update the active tab and navigate
   const handleTabClick = (tabName: string, path: string) => {
     setSidebarTab(tabName);
-    selectProfile(null);
+    selectProfile(null); // Clear any selected profile when switching tabs
     router.push(path);
-  };
-
-  const handleLogout = () => {
-    logout();
-    router.push("/");
   };
 
   return (
     <motion.aside
-      animate={{ width: isSidebarCollapsed ? 72 : 240 }}
-      transition={{ duration: 0.25, ease: "easeInOut" }}
-      className="fixed left-0 top-0 z-40 h-screen bg-white border-r border-gray-200 flex flex-col justify-between select-none overflow-hidden"
+      // Smoothly animate the width based on whether we're expanded or not
+      animate={{ width: isExpanded ? 260 : 76 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      // Track hover state to expand/collapse
+      onHoverStart={() => setSidebarHovered(true)}
+      onHoverEnd={() => setSidebarHovered(false)}
+      className="fixed left-0 top-0 z-40 h-screen bg-card-bg border-r border-border backdrop-blur-xl flex flex-col justify-between select-none overflow-hidden transition-colors duration-300"
     >
-      {/* ── Upper Section ─────────────────────────────────────────── */}
       <div>
-        {/* Logo header */}
-        <div className="flex h-14 items-center justify-between px-4 border-b border-gray-100">
-          {!isSidebarCollapsed ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.05 }}
-              className="flex items-center gap-2.5"
-            >
-              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-sm-primary shrink-0">
-                <Heart className="w-3.5 h-3.5 text-white fill-white" />
-              </div>
-              <span className="font-sans font-semibold text-[14px] text-gray-900 tracking-tight whitespace-nowrap">
-                The Date Crew
-              </span>
-            </motion.div>
-          ) : (
-            <div className="flex items-center justify-center w-7 h-7 rounded-full bg-sm-primary mx-auto">
-              <Heart className="w-3.5 h-3.5 text-white fill-white" />
+        {/* The top section with our logo and brand name */}
+        <div className="flex h-16 items-center px-5 border-b border-border">
+          <div className="flex items-center gap-3">
+            {/* Our signature Heart icon */}
+            <div className="flex items-center justify-center w-9 h-9 rounded-full bg-sm-primary shrink-0 transition-all duration-300">
+              <Heart className="w-4 h-4 text-white fill-white" />
             </div>
-          )}
-
-          {!isSidebarCollapsed && (
-            <button
-              onClick={toggleSidebar}
-              className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-          )}
+            {/* Only show the text if we have space (expanded) */}
+            <AnimatePresence>
+              {isExpanded && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex flex-col"
+                >
+                  <span className="font-display text-[17px] font-normal text-foreground tracking-tight whitespace-nowrap">
+                    The Date Crew
+                  </span>
+                  <span className="text-[11px] text-foreground/45 uppercase tracking-widest leading-none mt-0.5">
+                    Matchmaker
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* Navigation items */}
-        <nav className="mt-3 px-2.5 space-y-0.5">
+        {/* The actual navigation links */}
+        <nav className="px-3 pt-6 space-y-1">
           {menuItems.map((item) => {
             const isActive = activeSidebarTab === item.name;
             const Icon = item.icon;
@@ -99,37 +97,39 @@ export function Sidebar() {
               <button
                 key={item.name}
                 onClick={() => handleTabClick(item.name, item.path)}
-                className={`
-                  w-full flex items-center gap-3 px-2.5 py-2.5 rounded-md text-[13px] font-medium
-                  transition-all duration-150 group relative
-                  ${isActive
-                    ? "bg-violet-50 text-sm-primary border border-violet-100"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-transparent"
-                  }
-                `}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 group relative ${
+                  isActive
+                    ? "bg-sm-primary text-white"
+                    : "text-foreground/60 hover:text-foreground hover:bg-muted"
+                }`}
               >
-                <div className="flex items-center justify-center min-w-[18px]">
+                {/* The icon for the menu item */}
+                <div className="flex items-center justify-center min-w-[20px]">
                   <Icon
                     className={`w-4 h-4 transition-colors ${
-                      isActive ? "text-sm-primary" : "text-gray-400 group-hover:text-gray-700"
+                      isActive ? "text-white" : "text-foreground/45 group-hover:text-sm-primary"
                     }`}
                   />
                 </div>
 
-                {!isSidebarCollapsed && (
-                  <motion.span
-                    initial={{ opacity: 0, x: -4 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.12 }}
-                    className="whitespace-nowrap"
-                  >
-                    {item.name}
-                  </motion.span>
-                )}
+                {/* The label, shown only when expanded */}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -4 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -4 }}
+                      transition={{ duration: 0.15 }}
+                      className="whitespace-nowrap"
+                    >
+                      {item.name}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
 
-                {/* Collapsed tooltip */}
-                {isSidebarCollapsed && (
-                  <div className="absolute left-14 scale-0 origin-left rounded-md bg-gray-900 text-white px-2.5 py-1.5 text-[12px] font-semibold group-hover:scale-100 transition-transform duration-150 z-50 whitespace-nowrap shadow-lg">
+                {/* A helpful tooltip when we're collapsed */}
+                {!isExpanded && (
+                  <div className="absolute left-14 scale-0 origin-left rounded-lg bg-foreground text-background px-3 py-1.5 text-[12px] font-medium group-hover:scale-100 transition-transform duration-150 z-50 whitespace-nowrap shadow-xl">
                     {item.name}
                   </div>
                 )}
@@ -139,51 +139,25 @@ export function Sidebar() {
         </nav>
       </div>
 
-      {/* ── Bottom: User + Logout ─────────────────────────────────── */}
-      <div className="p-2.5 border-t border-gray-100 space-y-1.5">
-        {isSidebarCollapsed && (
-          <button
-            onClick={toggleSidebar}
-            className="flex items-center justify-center w-full p-2 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        )}
-
-        {!isSidebarCollapsed ? (
-          <div className="flex items-center justify-between p-2 rounded-md bg-gray-50 border border-gray-200">
-            <div className="flex items-center gap-2 overflow-hidden">
-              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-sm-primary text-white font-semibold text-xs shrink-0">
-                {session.name ? session.name.charAt(0).toUpperCase() : "M"}
-              </div>
-              <div className="flex flex-col text-left overflow-hidden">
-                <span className="text-[13px] font-medium truncate text-gray-900 leading-none">
-                  {session.name || "Matchmaker"}
-                </span>
-                <span className="text-[10px] text-gray-400 truncate mt-0.5 leading-none">
-                  {session.role || "Consultant"}
-                </span>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
-              title="Log Out"
+      {/* The bottom "Premium CRM" badge section */}
+      <div className="p-4">
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="rounded-2xl border border-border bg-muted/40 p-4"
             >
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={handleLogout}
-            className="flex items-center justify-center w-full p-2 rounded-md hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors group relative"
-          >
-            <LogOut className="w-4 h-4" />
-            <div className="absolute left-14 scale-0 rounded-md bg-red-500 text-white px-2.5 py-1.5 text-[12px] font-semibold group-hover:scale-100 transition-transform duration-150 origin-left z-50 whitespace-nowrap shadow-lg">
-              Log Out
-            </div>
-          </button>
-        )}
+              <p className="font-display text-[15px] leading-tight text-foreground">
+                Premium CRM
+              </p>
+              <p className="mt-2 text-[11px] leading-relaxed text-foreground/40">
+                Editorial clarity for elite matchmaking workflows.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.aside>
   );

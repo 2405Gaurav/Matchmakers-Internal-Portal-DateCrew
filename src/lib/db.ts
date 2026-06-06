@@ -1,29 +1,53 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../generated/prisma/client";
+import { PrismaNeon } from "@prisma/adapter-neon";
 
-// Prevent multiple Prisma Client instances in development (Next.js hot reload)
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+const globalForPrisma = globalThis as unknown as {
+  prisma?: PrismaClient;
+};
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
+function createPrismaClient() {
+  const connectionString = process.env.DATABASE_URL;
+
+  if (!connectionString) {
+    throw new Error("DATABASE_URL is not configured.");
+  }
+
+  const adapter = new PrismaNeon({ connectionString });
+
+  return new PrismaClient({
+    adapter,
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
+}
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export function parseProfile(p: any) {
+function parseJsonField<T>(value: any): T {
+  if (value === null || value === undefined) return [] as unknown as T;
+  if (typeof value === "string") {
+    try { return JSON.parse(value) as T; } catch { return value as unknown as T; }
+  }
+  return value as T;
+}
+
+export function parseProfile(profile: any) {
+  if (!profile) return null;
   return {
-    ...p,
-    languages: typeof p.languages === "string" ? JSON.parse(p.languages) : p.languages,
-    education: typeof p.education === "string" ? JSON.parse(p.education) : p.education,
-    career: typeof p.career === "string" ? JSON.parse(p.career) : p.career,
-    preferences: typeof p.preferences === "string" ? JSON.parse(p.preferences) : p.preferences,
-    familyInfo: typeof p.familyInfo === "string" ? JSON.parse(p.familyInfo) : p.familyInfo,
-    savedMatches: typeof p.savedMatches === "string" ? JSON.parse(p.savedMatches) : p.savedMatches,
-    sentMatches: typeof p.sentMatches === "string" ? JSON.parse(p.sentMatches) : p.sentMatches,
-    notes: p.notes
-      ? p.notes.map((n: any) => ({ ...n, isAiGenerated: !!n.isAiGenerated }))
+    ...profile,
+    languages:    parseJsonField(profile.languages),
+    education:    parseJsonField(profile.education),
+    career:       parseJsonField(profile.career),
+    preferences:  parseJsonField(profile.preferences),
+    familyInfo:   parseJsonField(profile.familyInfo),
+    savedMatches: parseJsonField(profile.savedMatches),
+    sentMatches:  parseJsonField(profile.sentMatches),
+    notes: profile.notes
+      ? profile.notes.map((note: any) => ({ ...note, isAiGenerated: Boolean(note.isAiGenerated) }))
       : [],
   };
 }

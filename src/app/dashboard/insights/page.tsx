@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { useCRMStore } from "@/store/crmStore";
+import { buildGeminiRequestHeaders } from "@/utils/geminiClient";
 import {
   Sparkles,
   TrendingUp,
@@ -9,7 +10,8 @@ import {
   MessageSquareCode,
   Coffee,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  TriangleAlert
 } from "lucide-react";
 
 export default function AIInsightsPage() {
@@ -20,6 +22,7 @@ export default function AIInsightsPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [report, setReport] = useState<any | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Filter lists
   const grooms = useMemo(() => profiles.filter((p) => p.gender === "Male"), [profiles]);
@@ -34,11 +37,15 @@ export default function AIInsightsPage() {
 
     setIsAnalyzing(true);
     setReport(null);
+    setErrorMessage("");
 
     try {
       const res = await fetch("/api/ai/insights", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...buildGeminiRequestHeaders()
+        },
         body: JSON.stringify({ clientA, clientB })
       });
 
@@ -46,10 +53,12 @@ export default function AIInsightsPage() {
         const reportData = await res.json();
         setReport(reportData);
       } else {
-        console.error("Failed to generate AI analysis:", res.statusText);
+        const data = await res.json().catch(() => null);
+        setErrorMessage(data?.error || "Failed to generate Gemini analysis.");
       }
     } catch (err) {
       console.error("Error generating AI analysis:", err);
+      setErrorMessage("Unable to reach the Gemini insights service.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -63,7 +72,7 @@ export default function AIInsightsPage() {
           <Sparkles className="w-5.5 h-5.5 text-purple-500 fill-purple-500/15" /> AI Matchmaker Consultant Insights
         </h1>
         <p className="text-xs text-foreground/60 mt-1">
-          Perform multi-profile comparative analysis and generate icebreakers utilizing our simulated OpenAI engine.
+          Perform multi-profile comparative analysis and generate icebreakers using the Gemini SDK with personal-key or backend-key routing.
         </p>
       </div>
 
@@ -124,18 +133,32 @@ export default function AIInsightsPage() {
               </>
             ) : (
               <>
-                <Sparkles className="w-4.5 h-4.5" /> Generate AI Match Analysis
+                <Sparkles className="w-4.5 h-4.5" /> Generate Gemini Match Analysis
               </>
             )}
           </button>
         </form>
       </div>
 
+      {errorMessage && (
+        <div className="p-4 rounded-2xl border border-red-500/20 bg-red-500/5 text-red-600 text-xs font-semibold flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
       {/* Analysis Report Results */}
       {report && clientA && clientB && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up">
           {/* Main Column: AI Analysis details */}
           <div className="lg:col-span-2 space-y-6">
+            {report.warning && (
+              <div className="p-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 text-amber-700 text-xs font-semibold flex items-start gap-2">
+                <TriangleAlert className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{report.warning}</span>
+              </div>
+            )}
+
             {/* Overview summary */}
             <div className="p-5 rounded-2xl glass-panel space-y-4">
               <h3 className="text-xs font-bold tracking-wider text-purple-400 uppercase border-b border-border pb-1.5 flex items-center gap-1.5">

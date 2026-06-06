@@ -44,14 +44,15 @@ export async function PATCH(
     const { id } = await params;
     const body = await req.json();
 
-    // Prepare update data by serializing nested structures if present
+    // Prepare update data and keep JSON fields as real JSON values for Prisma.
     const updateData: any = {};
     
     const fields = [
       "firstName", "lastName", "gender", "dob", "age", "height", 
       "religion", "caste", "maritalStatus", "email", "phone", 
       "country", "city", "status", "assignedMatchmaker", "lastActivity", 
-      "imageUrl"
+      "imageUrl", "languages", "education", "career", "preferences", 
+      "familyInfo", "savedMatches", "sentMatches"
     ];
 
     for (const field of fields) {
@@ -60,18 +61,9 @@ export async function PATCH(
       }
     }
 
-    // Number conversions
-    if (body.age !== undefined) updateData.age = Number(body.age);
-    if (body.height !== undefined) updateData.height = Number(body.height);
-
-    // Serialization of nested objects/arrays
-    if (body.languages !== undefined) updateData.languages = JSON.stringify(body.languages);
-    if (body.education !== undefined) updateData.education = JSON.stringify(body.education);
-    if (body.career !== undefined) updateData.career = JSON.stringify(body.career);
-    if (body.preferences !== undefined) updateData.preferences = JSON.stringify(body.preferences);
-    if (body.familyInfo !== undefined) updateData.familyInfo = JSON.stringify(body.familyInfo);
-    if (body.savedMatches !== undefined) updateData.savedMatches = JSON.stringify(body.savedMatches);
-    if (body.sentMatches !== undefined) updateData.sentMatches = JSON.stringify(body.sentMatches);
+    // Ensure numeric values are numbers
+    if (updateData.age !== undefined) updateData.age = Number(updateData.age);
+    if (updateData.height !== undefined) updateData.height = Number(updateData.height);
 
     const updatedProfile = await prisma.customerProfile.update({
       where: { id },

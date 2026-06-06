@@ -27,97 +27,97 @@ const config: Config = {
 
         // ── Stripe Modern palette ─────────────────────────────────
         sm: {
-          primary:      "#533AFD",
-          secondary:    "#111827",
-          tertiary:     "#B9B9F9",
-          neutral:      "#FFFFFF",
-          surface:      "#FFFFFF",
-          "on-surface": "#0F172A",
-          muted:        "#64748B",
+          primary:      "#d97706",
+          secondary:    "#16140F",
+          tertiary:     "#F5F5EE",
+          neutral:      "#E5E7EB",
+          surface:      "#F5F5EE",
+          "on-surface": "#16140F",
+          muted:        "#666666",
           border:       "#E5E7EB",
-          accent:       "#81B81A",
-          error:        "#EF4444",
+          accent:       "#15803D",
+          error:        "#B42318",
         },
 
         // ── Backward compat: brand tokens ─────────────────────────
         // All existing `bg-brand-500`, `text-brand-500` etc. in
-        // dashboard pages now resolve to violet primary.
+        // dashboard pages now resolve to amber primary.
         brand: {
-          400: "#7B5FFF",
-          500: "#533AFD",
-          600: "#4026E8",
-          700: "#3019CC",
+          400: "#f59e0b",
+          500: "#d97706",
+          600: "#b45309",
+          700: "#92400e",
         },
 
         // ── Backward compat: hn tokens (used by all dashboard code)
-        // hn-primary  was off-white in dark theme → now violet brand
+        // hn-primary  was off-white in dark theme → now amber brand
         // hn-secondary was dark bg  → now white
         hn: {
-          primary:   "#533AFD",   // violet brand  (avatar bg, active nav, etc.)
-          secondary: "#FFFFFF",   // white          (text on violet bg, etc.)
-          neutral:   "#F3F4F6",   // light gray
-          tertiary:  "#F1F5F9",   // very light
-          error:     "#EF4444",   // red
+          primary:   "#d97706",
+          secondary: "#F5F5EE",
+          neutral:   "#EFE9DE",
+          tertiary:  "#FAF8F2",
+          error:     "#B42318",
         },
       },
 
       // ── Font families ─────────────────────────────────────────────
       fontFamily: {
-        sans:    ["'Plus Jakarta Sans'", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
-        display: ["'Plus Jakarta Sans'", "sans-serif"],
+        sans:    ["'Outfit'", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
+        display: ["'Source Serif 4'", "serif"],
         // Backward compat: `font-body` and `font-display` used in old components
-        body:    ["'Plus Jakarta Sans'", "-apple-system", "sans-serif"],
+        body:    ["'Outfit'", "-apple-system", "sans-serif"],
       },
 
       // ── Type scale — Stripe Modern ─────────────────────────────────
       fontSize: {
-        "display":      ["48px",  { lineHeight: "1.15", letterSpacing: "-0.02em", fontWeight: "300" }],
-        "headline-lg":  ["32px",  { lineHeight: "1.1",  letterSpacing: "-0.02em", fontWeight: "300" }],
-        "headline-md":  ["20px",  { lineHeight: "1.25", letterSpacing: "-0.01em", fontWeight: "300" }],
-        "headline-sm":  ["16px",  { lineHeight: "1.4",                            fontWeight: "300" }],
-        "body-lg":      ["18px",  { lineHeight: "1.6",                            fontWeight: "300" }],
-        "body-md":      ["14px",  { lineHeight: "1.6",                            fontWeight: "300" }],
-        "body-sm":      ["12px",  { lineHeight: "1.5",                            fontWeight: "300" }],
-        "label-lg":     ["16px",  { lineHeight: "1.2",                            fontWeight: "400" }],
-        "label-md":     ["14px",  { lineHeight: "1.2",                            fontWeight: "400" }],
-        "label-sm":     ["12px",  { lineHeight: "1.2",                            fontWeight: "400" }],
-        "eyebrow":      ["13px",  { lineHeight: "1.2",  letterSpacing: "0.04em",  fontWeight: "500" }],
+        "display":      ["56px",  { lineHeight: "1.08", letterSpacing: "-0.01em", fontWeight: "300" }],
+        "headline-lg":  ["44px",  { lineHeight: "1.1",  letterSpacing: "-0.01em", fontWeight: "300" }],
+        "headline-md":  ["32px",  { lineHeight: "1.14", letterSpacing: "0",       fontWeight: "300" }],
+        "headline-sm":  ["28px",  { lineHeight: "1.21", letterSpacing: "0",       fontWeight: "400" }],
+        "body-lg":      ["18px",  { lineHeight: "1.4",  letterSpacing: "0",       fontWeight: "300" }],
+        "body-md":      ["16px",  { lineHeight: "1.5",  letterSpacing: "0",       fontWeight: "300" }],
+        "body-sm":      ["14px",  { lineHeight: "1.45", letterSpacing: "0",       fontWeight: "300" }],
+        "label-lg":     ["16px",  { lineHeight: "1.4",  letterSpacing: "0",       fontWeight: "400" }],
+        "label-md":     ["14px",  { lineHeight: "1.35", letterSpacing: "0",       fontWeight: "400" }],
+        "label-sm":     ["12px",  { lineHeight: "1.3",  letterSpacing: "0",       fontWeight: "400" }],
+        "eyebrow":      ["13px",  { lineHeight: "1.2",  letterSpacing: "0.04em",  fontWeight: "400" }],
       },
 
       // ── Border radius — both new sm-* and legacy hn-* ─────────────
       borderRadius: {
         // Stripe Modern tokens
         "sm-sm":   "4px",
-        "sm-md":   "6px",
+        "sm-md":   "8px",
         "sm-lg":   "12px",
-        "sm-xl":   "20px",
+        "sm-xl":   "24px",
         "sm-full": "9999px",
         // Legacy hn-* tokens (used by sidebar, dashboard, etc.)
-        "hn-sm":   "6px",
+        "hn-sm":   "4px",
         "hn-md":   "8px",
         "hn-lg":   "12px",
-        "hn-xl":   "16px",
+        "hn-xl":   "24px",
         "hn-pill": "9999px",
       },
 
       // ── Spacing extras ─────────────────────────────────────────────
       spacing: {
         "sm-xs": "6px",
-        "sm-sm": "14px",
-        "sm-md": "24px",
-        "sm-lg": "40px",
-        "sm-xl": "80px",
+        "sm-sm": "16px",
+        "sm-md": "30px",
+        "sm-lg": "48px",
+        "sm-xl": "64px",
       },
 
       // ── Shadows ────────────────────────────────────────────────────
       boxShadow: {
-        "sm-card":    "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
-        "sm-card-lg": "0 4px 24px rgba(83,58,253,0.08), 0 1px 3px rgba(0,0,0,0.04)",
-        "sm-btn":     "0 4px 16px rgba(83,58,253,0.25)",
+        "sm-card":    "0 0 0 1px rgba(22,20,15,0.04)",
+        "sm-card-lg": "0 8px 30px rgba(22,20,15,0.06)",
+        "sm-btn":     "0 8px 24px rgba(180,83,9,0.12)",
         // Legacy tokens used in dashboard
-        "hn-soft":    "0 2px 12px rgba(0,0,0,0.08)",
-        "glow":       "0 0 8px rgba(83,58,253,0.2)",
-        "glow-lg":    "0 0 24px rgba(83,58,253,0.15)",
+        "hn-soft":    "0 8px 24px rgba(22,20,15,0.05)",
+        "glow":       "0 0 0 1px rgba(217,119,6,0.16)",
+        "glow-lg":    "0 10px 30px rgba(217,119,6,0.12)",
       },
 
       // ── Max widths ─────────────────────────────────────────────────
