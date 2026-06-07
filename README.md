@@ -37,7 +37,7 @@ Gender-specific logic built around Indian matrimonial norms.
 
 **For Female Clients:** Focuses on career compatibility, value alignment, lifestyle preferences, and relocation openness. Weighs dietary habits which carry significant weight in Indian matchmaking.
 
-**Scoring Engine:** 100-point normalized system across six axes — Values, Lifestyle, Family Planning, Career, Location, and Language.
+**Scoring Engine:** 100-point normalized system across seven axes — Values, Lifestyle, Family Planning, Career, Location, Language, and Height Compatibility.
 
 ### AI Integration
 
@@ -84,7 +84,7 @@ Gender-specific logic built around Indian matrimonial norms.
 
 1. **Persona:** Primary user is an internal matchmaker who needs high-level overviews and quick action capabilities.
 2. **Data:** 200 profiles generated deterministically via a custom seeding script to ensure reproducible results across environments.
-3. **Tradition vs. Modernity:** Matching logic balances traditional Indian preferences (caste, height) with modern compatibility factors (career trajectory, lifestyle alignment).
+3. **Tradition vs. Modernity:** Matching logic balances traditional Indian preferences (caste, religion, height) with modern compatibility factors (career trajectory, lifestyle alignment, relocation flexibility).
 4. **Authentication:** Single-account portal model — one matchmaker account manages the full client database.
 
 ---
@@ -190,4 +190,4 @@ TheDateCrew/
 ## Author
 
 Gaurav 
-www.thegauravthakur.in  
+www.thegauravthakur.in
