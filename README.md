@@ -1,7 +1,7 @@
 # The Date Crew — Matchmaker CRM
 
-**Live Demo:** https://the-date-crew.vercel.app  
-**Author:** Gaurav Thakur (Fullstack Intern)
+**Live Demo:** https://matchmakers-internal-portal-date-cr.vercel.app/
+**Author:** Gaurav 
 
 An elite, database-connected matrimonial CRM built for The Date Crew matchmaking agency. Enables matchmakers to manage client profiles, compute compatibility scores, and leverage AI to draft personalized introductions.
 
@@ -189,6 +189,5 @@ TheDateCrew/
 
 ## Author
 
-Gaurav Thakur  
+Gaurav 
 www.thegauravthakur.in  
-Fullstack Intern @ The Date Crew
