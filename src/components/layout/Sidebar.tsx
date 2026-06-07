@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useCRMStore } from "@/store/crmStore";
 import { useRouter } from "next/navigation";
+import { Logo } from "@/components/Logo";
 
 // The Sidebar component: Our main navigation anchor that stays on the left
 export function Sidebar() {
@@ -62,7 +63,7 @@ export function Sidebar() {
         {/* The top section with our logo and brand name */}
         <div className="flex h-16 items-center px-5 border-b border-border">
           <div className="flex items-center gap-3">
-            <img src="https://cdn.prod.website-files.com/673e1a80860f50c64038afa6/690c01e8a7ef61abdc9353ba_Frame%201.svg" alt="The Date Crew Logo" className="h-8" />
+            <Logo className="h-8 w-auto text-foreground" />
           </div>
         </div>
 

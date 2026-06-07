@@ -4,6 +4,7 @@ import React from "react";
 import { ChevronRight, Menu } from "lucide-react";
 import { useCRMStore } from "../store/crmStore";
 import { useRouter } from "next/navigation";
+import { Logo } from "./Logo";
 
 export function Navbar() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export function Navbar() {
         {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-1.5 text-xs md:text-sm font-medium text-foreground/60 select-none">
           <span className="hover:text-foreground cursor-pointer transition-colors flex items-center" onClick={() => router.push("/dashboard")}>
-            <img src="https://cdn.prod.website-files.com/673e1a80860f50c64038afa6/690c01e8a7ef61abdc9353ba_Frame%201.svg" alt="The Date Crew Logo" className="h-4" />
+            <Logo className="h-4 w-auto text-foreground" />
           </span>
           <ChevronRight className="w-3.5 h-3.5" />
           <span

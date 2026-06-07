@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, ArrowRight, Menu, X } from "lucide-react";
 import { useCRMStore } from "@/store/crmStore";
+import { Logo } from "@/components/Logo";
 
 // The LandingNavbar: A floating, pill-shaped navigation for our landing page
 export function LandingNavbar() {
@@ -46,7 +47,7 @@ export function LandingNavbar() {
 
             {/* --- Left: Logo + Brand --- */}
             <Link href="/" className="flex items-center gap-2.5 group select-none shrink-0">
-              <img src="https://cdn.prod.website-files.com/673e1a80860f50c64038afa6/690c01e8a7ef61abdc9353ba_Frame%201.svg" alt="The Date Crew Logo" className="h-8" />
+              <Logo className="h-8 w-auto text-foreground" />
             </Link>
 
 

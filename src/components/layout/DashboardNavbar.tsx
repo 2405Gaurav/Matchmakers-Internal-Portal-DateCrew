@@ -6,6 +6,7 @@ import { ChevronDown, ChevronRight, LogOut, Menu, Search, Settings, Home } from 
 import { useCRMStore } from "@/store/crmStore";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/features/ThemeToggle";
+import { Logo } from "@/components/Logo";
 
 // The Navbar component: Sits at the top and gives us quick access to search, theme, and profile
 export function DashboardNavbar() {
@@ -84,7 +85,7 @@ export function DashboardNavbar() {
             className="hover:text-foreground cursor-pointer transition-colors font-light flex items-center"
             onClick={() => router.push("/dashboard")}
           >
-            <img src="https://cdn.prod.website-files.com/673e1a80860f50c64038afa6/690c01e8a7ef61abdc9353ba_Frame%201.svg" alt="The Date Crew Logo" className="h-4" />
+            <Logo className="h-4 w-auto text-foreground" />
           </span>
           <ChevronRight className="w-3 h-3" />
           <span
