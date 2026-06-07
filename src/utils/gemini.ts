@@ -66,8 +66,7 @@ export async function runGeminiRequest<T>(
   const canFallbackToBackend =
     config.keySource === "personal" &&
     config.allowBackendFallback &&
-    Boolean(config.backendApiKey) &&
-    config.backendApiKey !== config.personalApiKey;
+    Boolean(config.backendApiKey)
 
   if (primaryApiKey) {
     try {
