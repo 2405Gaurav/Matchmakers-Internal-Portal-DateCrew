@@ -53,6 +53,7 @@ const getSavedSession = () => {
 };
 
 // This is the brain of our CRM - where we keep track of everything from profiles to theme settings
+// this is the stor where all datas goes to 
 export const useCRMStore = create<CRMState>((set, get) => {
   let themeTransitionTimeout: ReturnType<typeof setTimeout> | undefined;
 
@@ -105,6 +106,7 @@ export const useCRMStore = create<CRMState>((set, get) => {
     quickActionsOpen: false,
 
     // Fetch all the initial data we need to show on the dashboard
+    // fettchin all datas for the deshbard
     fetchInitialData: async () => {
       try {
         const [profilesRes, activitiesRes] = await Promise.all([
@@ -137,6 +139,7 @@ export const useCRMStore = create<CRMState>((set, get) => {
     },
 
     // Clear everything out when the user logs out
+    // dleting everithin becaus the youser log out
     logout: () => {
       if (typeof window !== "undefined") {
         localStorage.removeItem("tdc-crm-session");
@@ -162,6 +165,7 @@ export const useCRMStore = create<CRMState>((set, get) => {
     setAiSearchQuery: (query) => set({ aiSearchQuery: query }),
 
     // Theme toggling logic
+    // we swetch batween dark an ligh mode here
     toggleTheme: () => {
       const current = get().theme;
       const next = current === "dark" ? "light" : "dark";

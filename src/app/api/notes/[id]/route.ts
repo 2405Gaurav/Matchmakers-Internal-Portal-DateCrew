@@ -9,12 +9,14 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   if (!process.env.DATABASE_URL) {
+    // chacking if the databse url is there orelse we carsh
     console.error("PATCH /api/notes/[id] error: DATABASE_URL is not set");
     return NextResponse.json({ error: "Database connection string is missing." }, { status: 500 });
   }
 
   try {
     const { id } = await params;
+    // gittig the id from paramaterrs
     const body = await req.json();
     const { content } = body;
 
@@ -22,6 +24,7 @@ export async function PATCH(
       where: { id },
       data: { content }
     });
+    // save the nue contnt to the daytabse
 
     return NextResponse.json(note);
   } catch (error: any) {
@@ -41,6 +44,7 @@ export async function DELETE(
 
   try {
     const { id } = await params;
+    // we need to dlete it so we get id furst
 
     await prisma.matchNote.delete({
       where: { id }

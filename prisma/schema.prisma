@@ -4,11 +4,13 @@ generator client {
 }
 
 datasource db {
+  // we ar using postgresql 4 our database cuz its reelable
   provider = "postgresql"
  
 }
 
 model CustomerProfile {
+  // all customer infos goes hear like ther hights and stuff
   id                 String      @id @default(cuid())
   firstName          String
   lastName           String
@@ -40,6 +42,7 @@ model CustomerProfile {
 }
 
 model MatchNote {
+  // notes abot matces so we rimember wut happened
   id            String          @id @default(cuid())
   profileId     String
   date          String
@@ -52,6 +55,7 @@ model MatchNote {
 }
 
 model ActivityUpdate {
+  // loggs for wut peoples did in the app
   id          String   @id @default(cuid())
   timestamp   String
   profileId   String

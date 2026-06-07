@@ -24,6 +24,7 @@ export default function AIInsightsPage() {
   const [report, setReport] = useState<any | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // filter the list to git the grroms n brides sepereately
   // Filter lists
   const grooms = useMemo(() => profiles.filter((p) => p.gender === "Male"), [profiles]);
   const brides = useMemo(() => profiles.filter((p) => p.gender === "Female"), [profiles]);
@@ -36,6 +37,7 @@ export default function AIInsightsPage() {
     if (!clientA || !clientB) return;
 
     setIsAnalyzing(true);
+    // im setting anilizing to true becouse we r startting the fetch now
     setReport(null);
     setErrorMessage("");
 
@@ -50,6 +52,7 @@ export default function AIInsightsPage() {
       });
 
       if (res.ok) {
+        // if the responce is okay we save the reprt data 
         const reportData = await res.json();
         setReport(reportData);
       } else {
@@ -81,6 +84,7 @@ export default function AIInsightsPage() {
         <form onSubmit={handleGenerateAnalysis} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Pick Groom (Male) */}
+            {/* this is the drop down were u pic the groom client */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-foreground/60 uppercase tracking-wider block">
                 Select Client A (Groom)
@@ -226,6 +230,7 @@ export default function AIInsightsPage() {
                 </svg>
                 <div className="absolute flex flex-col items-center">
                   <span className="text-2xl font-extrabold text-foreground">{report.score}%</span>
+                  {/* dispalying the persentage score hear */}
                   <span className="text-[9px] text-foreground/50 font-bold uppercase">Match</span>
                 </div>
               </div>

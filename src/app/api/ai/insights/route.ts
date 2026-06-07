@@ -5,6 +5,7 @@ import { hasGeminiApiKey, resolveGeminiRuntimeConfig, runGeminiRequest } from "@
 
 export async function POST(req: Request) {
   try {
+    // gittig client a n b frum req so we can comper
     const body = await req.json();
     const { clientA, clientB } = body;
 
@@ -14,6 +15,7 @@ export async function POST(req: Request) {
 
     const comp = calculateCompatibilityScore(clientA, clientB);
 
+    // fetcin gemin cfg so we can youse ai
     const geminiConfig = resolveGeminiRuntimeConfig(req, 0.7);
 
     if (!hasGeminiApiKey(geminiConfig)) {
@@ -31,6 +33,7 @@ export async function POST(req: Request) {
     }
 
     const systemPrompt = `You are a Senior Matchmaking Director at "The Date Crew", a bespoke matrimonial agency.
+// tellin the ai wat to du exactly so it donyt do wirid stuffs
 Your task is to write relationship insights, compatibility briefs, and meeting icebreakers for a prospective couple.
 Be concise. Keep each field brief — no field should exceed 3 sentences or 80 words.
 You MUST respond with a valid JSON object matching exactly this structure:

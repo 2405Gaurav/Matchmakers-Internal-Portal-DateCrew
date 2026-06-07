@@ -5,6 +5,7 @@ import { prisma, parseProfile } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  // gettin custumers form the daytabase
   if (!process.env.DATABASE_URL) {
     console.error("GET /api/customers error: DATABASE_URL is not set");
     return NextResponse.json({ error: "Database connection string is missing." }, { status: 500 });
@@ -21,6 +22,7 @@ export async function GET() {
     });
 
     const parsedProfiles = profiles.map(parseProfile);
+    // returnin parsed profles so its ez 2 red
     return NextResponse.json(parsedProfiles);
   } catch (error: any) {
     console.error("GET /api/customers error:", error);
@@ -35,6 +37,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    // try to get bdy from json bcas we need new profil data
     const body = await req.json();
     const {
       id,

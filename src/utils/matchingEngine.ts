@@ -4,54 +4,89 @@ export function calculateCompatibilityScore(
   profileA: CustomerProfile,
   profileB: CustomerProfile
 ): CompatibilityReport {
-  // If same gender, let's return low compatibility unless it's a special search (but standard matrimonial search is opposite genders here)
-  const isSameGender = profileA.gender === profileB.gender;
 
-  let valuesMatch = 0;      // max 20
-  let lifestyleMatch = 0;   // max 20
-  let familyGoals = 0;      // max 15
+  // TDC is a hetro matrimonial service for now so same gender = skip
+  // if they ever want to support same-sex matching in future, just remove this block
+  // rest of the engine is gender neutral so no other changes needed
+  if (profileA.gender === profileB.gender) {
+    return {
+      score: 0,
+      breakdown: {
+        valuesMatch: 0,
+        lifestyleMatch: 0,
+        familyGoals: 0,
+        careerCompatibility: 0,
+        relocationPreference: 0,
+        languageMatch: 0,
+      },
+      explanation: "This match was skipped — TDC currently matches opposite-gender profiles only.",
+      strengths: [],
+      concerns: ["Same-gender pairing is outside TDC's current matching scope."],
+      suggestedIntro: "",
+    };
+  }
+
+  let valuesMatch = 0;         // max 20
+  let lifestyleMatch = 0;      // max 20
+  let familyGoals = 0;         // max 15
   let careerCompatibility = 0; // max 15
-  let relocationPreference = 0; // max 15
-  let languageMatch = 0;    // max 15
+  let relocationPreference = 0;// max 15
+  let languageMatch = 0;       // max 15
 
   const strengths: string[] = [];
   const concerns: string[] = [];
 
-  // --- 1. Values Match (Religion & Caste) ---
+  // --- 1. Values Match (max 20pts) ---
+  // religion and caste are big deal in indian matrimonial so weighted heavily
   if (profileA.religion === profileB.religion) {
     valuesMatch += 12;
     strengths.push(`Shared religious background: Both are ${profileA.religion}.`);
-    
+
     if (profileA.caste === profileB.caste) {
       valuesMatch += 8;
       strengths.push(`Same community: Both belong to the ${profileA.caste} community.`);
     } else {
-      valuesMatch += 5; // Open/compatible caste
+      // same religion diff caste, still okay
+      valuesMatch += 4;
     }
   } else {
-    valuesMatch += 6;
-    concerns.push(`Different religions: ${profileA.firstName} is ${profileA.religion} and ${profileB.firstName} is ${profileB.religion}.`);
+    // diff religion, flag it but not a hard block
+    valuesMatch += 5;
+    concerns.push(
+      `Different religions: ${profileA.firstName} is ${profileA.religion} and ${profileB.firstName} is ${profileB.religion}. Worth an open conversation.`
+    );
   }
 
-  // --- 2. Lifestyle Match (Diet, Drinking, Smoking) ---
-  // Diet
-  if (profileA.preferences.lifestyleChoices.diet === profileB.preferences.lifestyleChoices.diet) {
+  // --- 2. Lifestyle Match (max 20pts) ---
+  // diet, drinking, smoking — small things that become big after marraige
+
+  // diet (max 8pts)
+  const dietA = profileA.preferences.lifestyleChoices.diet;
+  const dietB = profileB.preferences.lifestyleChoices.diet;
+
+  if (dietA === dietB) {
     lifestyleMatch += 8;
-    strengths.push(`Aligned dietary preferences: Both are ${profileA.preferences.lifestyleChoices.diet === "veg" ? "Vegetarians" : profileA.preferences.lifestyleChoices.diet}.`);
+    strengths.push(
+      `Aligned dietary preferences: Both are ${dietA === "veg" ? "Vegetarian" : dietA}.`
+    );
+  } else if (
+    (dietA === "veg" && dietB === "non-veg") ||
+    (dietA === "non-veg" && dietB === "veg")
+  ) {
+    // hard clash, shared kitchen becomes a problem
+    lifestyleMatch += 3;
+    concerns.push(
+      `Dietary difference: ${profileA.firstName} is ${dietA} and ${profileB.firstName} is ${dietB}. Could be a source of daily friction.`
+    );
   } else {
-    const dietA = profileA.preferences.lifestyleChoices.diet;
-    const dietB = profileB.preferences.lifestyleChoices.diet;
-    if ((dietA === "veg" && dietB === "non-veg") || (dietA === "non-veg" && dietB === "veg")) {
-      lifestyleMatch += 4;
-      concerns.push(`Dietary difference: ${profileA.firstName} is ${dietA} and ${profileB.firstName} is ${dietB}.`);
-    } else {
-      lifestyleMatch += 6;
-    }
+    // eggetarian or pescatarian in the mix, manageable
+    lifestyleMatch += 5;
   }
 
-  // Drinking & Smoking
+  // drinking (max 6pts)
   const drinkA = profileA.preferences.lifestyleChoices.drinking;
   const drinkB = profileB.preferences.lifestyleChoices.drinking;
+
   if (drinkA === drinkB) {
     lifestyleMatch += 6;
   } else if (
@@ -59,136 +94,199 @@ export function calculateCompatibilityScore(
     (drinkA === "regularly" && drinkB === "never")
   ) {
     lifestyleMatch += 2;
-    concerns.push(`Lifestyle gap: Different drinking habits (${drinkA} vs ${drinkB}).`);
+    concerns.push(
+      `Different drinking habits: ${profileA.firstName} drinks ${drinkA}, ${profileB.firstName} drinks ${drinkB}. Worth a candid chat.`
+    );
   } else {
+    // one occasional one regular, not ideal but workable
     lifestyleMatch += 4;
   }
 
+  // smoking (max 6pts)
   const smokeA = profileA.preferences.lifestyleChoices.smoking;
   const smokeB = profileB.preferences.lifestyleChoices.smoking;
+
   if (smokeA === smokeB) {
     lifestyleMatch += 6;
-  } else if (smokeA === "never" && smokeB === "never") {
-    lifestyleMatch += 6;
-    strengths.push("Both are non-smokers.");
+    if (smokeA === "never") {
+      strengths.push("Both are non-smokers — great for a healthy shared environment.");
+    }
   } else if (
     (smokeA === "never" && smokeB === "regularly") ||
     (smokeA === "regularly" && smokeB === "never")
   ) {
+    // this one is hard to ignore longterm
     lifestyleMatch += 1;
-    concerns.push("Smoking preference conflict: One smokes regularly while the other does not.");
+    concerns.push(
+      "Smoking habit mismatch: One partner smokes regularly while the other doesn't. This often becomes a recurring point of tension."
+    );
   } else {
-    lifestyleMatch += 4;
+    lifestyleMatch += 3;
   }
 
-  // --- 3. Family Goals (Want Kids & Background) ---
+  // --- 3. Family Goals (max 15pts) ---
+  // removed the free +7 pts for "sibling background" that was there before, had no logic
+  // replaced it with age gap scoring which actually matters and was only a text flag before
+
+  // kids preference (max 8pts)
   const kidsA = profileA.preferences.wantKids;
   const kidsB = profileB.preferences.wantKids;
-  if (kidsA === kidsB || kidsA === "open" || kidsB === "open") {
+
+  if (kidsA === kidsB) {
     familyGoals += 8;
-    if (kidsA === true && kidsB === true) {
-      strengths.push("Both want to raise children in the future.");
+    if (kidsA === true) {
+      strengths.push("Both want to raise children together in the future.");
+    } else if (kidsA === false) {
+      strengths.push("Both are aligned on not wanting children — an important shared decision.");
+    } else {
+      strengths.push("Both are open about family planning — good foundation for an honest discussion.");
     }
+  } else if (kidsA === "open" || kidsB === "open") {
+    // one is flexibe, room to talk
+    familyGoals += 5;
   } else {
+    // one wants kids other doesnt, this is a real issue
+    familyGoals += 1;
+    concerns.push(
+      "Conflicting family planning views: One wants children, the other doesn't. This needs an early, honest conversation."
+    );
+  }
+
+  // age gap now effects the score (max 7pts), wasnt doing anything before except showing text
+  const ageDiff = Math.abs(profileA.age - profileB.age);
+  if (ageDiff <= 3) {
+    familyGoals += 7;
+    strengths.push(`Close in age: Only ${ageDiff} year(s) apart — great for life stage alignment.`);
+  } else if (ageDiff <= 6) {
+    familyGoals += 5;
+  } else if (ageDiff <= 10) {
     familyGoals += 3;
-    concerns.push("Divergent family planning preferences regarding children.");
-  }
-
-  // Siblings & backgrounds
-  familyGoals += 7;
-
-  // --- 4. Career & Income Compatibility ---
-  const incomeDiff = Math.abs(profileA.career.income - profileB.career.income);
-  if (incomeDiff < 10) {
-    careerCompatibility += 8;
-    strengths.push("Highly compatible income profiles.");
-  } else if (incomeDiff < 25) {
-    careerCompatibility += 6;
+    concerns.push(
+      `Age gap of ${ageDiff} years: Not a dealbreaker, but worth discussing life stage expectations.`
+    );
   } else {
-    careerCompatibility += 4;
-    concerns.push(`Income discrepancy: Annual income levels differ by ${incomeDiff} LPA.`);
+    familyGoals += 1;
+    concerns.push(
+      `Significant age gap: ${ageDiff} years difference. Likely at very different life stages — surface this early.`
+    );
   }
 
-  // Industries and degrees
+  // --- 4. Career & Income (max 15pts) ---
+  // old code used raw LPA diff which was unfair, 30lpa gap means diff things at diff income levels
+  // now using relative % gap which is more accurate
+
+  const incomeA = profileA.career.income;
+  const incomeB = profileB.career.income;
+  const higherIncome = Math.max(incomeA, incomeB);
+
+  // gap as % of higher earner
+  const incomeGapPercent = higherIncome > 0
+    ? ((Math.abs(incomeA - incomeB)) / higherIncome) * 100
+    : 0;
+
+  if (incomeGapPercent < 20) {
+    careerCompatibility += 8;
+    strengths.push("Well-matched income profiles — similar economic standing.");
+  } else if (incomeGapPercent < 50) {
+    // noticable gap but not extreme
+    careerCompatibility += 5;
+  } else {
+    careerCompatibility += 2;
+    concerns.push(
+      `Large income gap: ${Math.round(incomeGapPercent)}% difference in earnings. Worth discussing financial expectations and lifestyle alignment.`
+    );
+  }
+
+  // same industry = shared understanding of work life (max 7pts)
   if (profileA.career.industry === profileB.career.industry) {
     careerCompatibility += 7;
-    strengths.push(`Shared professional industry: Both work in ${profileA.career.industry}.`);
+    strengths.push(
+      `Same professional world: Both work in ${profileA.career.industry} — built-in mutual understanding.`
+    );
   } else {
-    careerCompatibility += 5;
+    // diff industry is fine, just no bonus
+    careerCompatibility += 4;
   }
 
-  // --- 5. Relocation Preference & Location ---
+  // --- 5. Relocation (max 15pts) ---
+  // city and flexibility, pretty straighforward
   const locA = profileA.city;
   const locB = profileB.city;
 
   if (locA === locB) {
     relocationPreference += 15;
-    strengths.push(`Same Location: Both reside in ${locA}.`);
+    strengths.push(`Same city: Both are based in ${locA} — no relocation headaches.`);
   } else {
     const relocA = profileA.preferences.openToRelocate;
     const relocB = profileB.preferences.openToRelocate;
-    
     const aOpenToB = profileA.preferences.preferredLocation.includes(locB);
     const bOpenToA = profileB.preferences.preferredLocation.includes(locA);
 
     if (relocA === true || relocB === true || aOpenToB || bOpenToA) {
       relocationPreference += 11;
-      strengths.push(`Location flexible: One or both parties are open to relocate or prefer each other's cities.`);
+      strengths.push(
+        "Location flexible: At least one of them is open to relocating — distance is solvable."
+      );
     } else if (relocA === "depends" || relocB === "depends") {
-      relocationPreference += 8;
-      concerns.push(`Long distance: Living in ${locA} and ${locB}. Relocation depends on career or family discussions.`);
+      relocationPreference += 7;
+      concerns.push(
+        `Different cities (${locA} and ${locB}): Relocation possible but needs a career/family discussion.`
+      );
     } else {
-      relocationPreference += 4;
-      concerns.push(`Geographical challenge: Living in ${locA} and ${locB} with limited relocation flexibility.`);
+      relocationPreference += 3;
+      concerns.push(
+        `Both in different cities (${locA} and ${locB}) with not much flexibility. Structral challenge.`
+      );
     }
   }
 
-  // --- 6. Language Match ---
+  // --- 6. Language (max 15pts) ---
+  // shared language = shared culture at home, its more than just communicaton
   const commonLangs = profileA.languages.filter((l) => profileB.languages.includes(l));
+
   if (commonLangs.length >= 2) {
     languageMatch += 15;
-    strengths.push(`Multilingual connection: Overlapping languages include ${commonLangs.join(" and ")}.`);
+    strengths.push(
+      `Multilingual connection: Shared languages include ${commonLangs.slice(0, 3).join(", ")}.`
+    );
   } else if (commonLangs.length === 1) {
     languageMatch += 10;
-    strengths.push(`Shared primary language: Both communicate in ${commonLangs[0]}.`);
+    strengths.push(`Common language: Both speak ${commonLangs[0]} — a strong communication anchor.`);
   } else {
-    languageMatch += 4;
-    concerns.push("No overlapping native languages (both speak English, but primary home languages differ).");
+    languageMatch += 3;
+    concerns.push(
+      "No shared native language. Communication in English works, but home-language comfort may differ — worth exploring."
+    );
   }
 
-  // --- Age and Height check fallback penalties ---
-  // Age difference
-  const ageDiff = Math.abs(profileA.age - profileB.age);
-  if (ageDiff > 7) {
-    concerns.push(`Age gap: ${ageDiff} years difference in age.`);
-  }
-  
-  // Height difference (Standard Indian matrimonial preference)
-  const isMaleA = profileA.gender === "Male";
-  const maleHeight = isMaleA ? profileA.height : profileB.height;
-  const femaleHeight = isMaleA ? profileB.height : profileA.height;
-  
-  if (femaleHeight > maleHeight) {
-    concerns.push("Height difference: Female is taller than male (traditionally preferred otherwise in matching).");
-  }
+  // note: removed height check (female taller than male) that was in old code
+  // it was just a sterotype, has no real effect on compatibilty
+  // if user wants height filter let them do it from search filters not here
 
-  // Normalize final score out of 100
+  // final score, clamped 0-100
+  // max possible: 20 + 20 + 15 + 15 + 15 + 15 = 100
   let score = valuesMatch + lifestyleMatch + familyGoals + careerCompatibility + relocationPreference + languageMatch;
-  if (isSameGender) {
-    score = Math.floor(score * 0.3); // Heavy penalty for matching same genders in standard config
-  }
-
   score = Math.max(0, Math.min(100, score));
 
-  // --- Mock AI Consultant Insights ---
-  const explanation = `${profileA.firstName} and ${profileB.firstName} demonstrate a promising ${score}% compatibility match. Their primary strength lies in ${
-    score > 85 ? "exceptional structural, cultural, and professional alignment" : "a solid core of cultural values and geographical accessibility"
-  }. Both have established professional careers in ${profileA.career.industry} and ${profileB.career.industry} respectively, matching their high-quality educational credentials from ${profileA.education.college} and ${profileB.education.college}. While there are minor points of discussion around ${
-    concerns.length > 0 ? concerns[0].toLowerCase().replace(":", "") : "lifestyle preferences"
-  }, their shared family ideals make them an excellent candidate pairing for an initial matchmaker-assisted call.`;
+  // explanation string passed to gemini/ai layer for enrichment
+  const explanation = `${profileA.firstName} and ${profileB.firstName} have a ${score}% compatibility score. ${
+    score >= 80
+      ? "This is a strong match with well-aligned values, lifestyle, and life goals."
+      : score >= 60
+      ? "This is a promising match with a good foundation — a few areas worth discussing openly."
+      : "This match has some meaningful differences. Not incompatible, but requires honest early conversations."
+  } Their ${strengths.length > 0 ? `standout strengths include ${strengths[0].toLowerCase()}` : "profile alignment is moderate"}. ${
+    concerns.length > 0
+      ? `The primary point of discussion would be around ${concerns[0].toLowerCase().replace(":", "")}.`
+      : "No major concerns flagged."
+  } Overall, they are ${score >= 70 ? "a recommended pairing for an initial matchmaker-assisted call." : "worth considering after a deeper profile review."}`;
 
-  // Suggested email intro
-  const suggestedIntro = `Hi ${profileA.firstName},\n\nI hope you are doing well. I have found an exceptional profile that aligns closely with your values and preferences.\n\nMeet ${profileB.firstName}, a ${profileB.age}-year-old ${profileB.career.designation} at ${profileB.career.company} based in ${profileB.city}. What stood out to me was your shared interest in ${profileB.preferences.lifestyleChoices.diet === "veg" ? "vegetarianism" : "lifestyle choices"} and your common languages (${commonLangs.slice(0, 2).join(", ")}). Both of you also share a strong educational background, having graduated from ${profileA.education.college} and ${profileB.education.college} respectively.\n\nLet me know if you would like me to share your profile with ${profileB.firstName}'s matchmaker to initiate a connection.\n\nBest regards,\n[Your Name]\nSenior Matchmaking Consultant\nThe Date Crew`;
+  // email intro template, same structure as before
+  const suggestedIntro = `Hi ${profileA.firstName},\n\nI hope you're doing well! I came across a profile I think is worth your attention.\n\nMeet ${profileB.firstName}, a ${profileB.age}-year-old ${profileB.career.designation} at ${profileB.career.company}, currently based in ${profileB.city}. What stood out: ${
+    commonLangs.length > 0
+      ? `you both speak ${commonLangs.slice(0, 2).join(" and ")}`
+      : "you share some strong values"
+  }, and both have solid educational backgrounds from ${profileA.education.college} and ${profileB.education.college} respectively.\n\nWould you like me to initiate a connection with ${profileB.firstName}'s matchmaker? Happy to share more details.\n\nWarm regards,\n[Your Name]\nSenior Matchmaking Consultant\nThe Date Crew`;
 
   return {
     score,

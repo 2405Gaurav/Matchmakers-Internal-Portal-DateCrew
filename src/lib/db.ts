@@ -5,6 +5,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
 };
 
+// makking primsa cliant hear so we dont mak to many of them
 function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL;
 
@@ -28,6 +29,7 @@ if (process.env.NODE_ENV !== "production") {
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function parseJsonField<T>(value: any): T {
+  // parssing jsons can be triggy sumtime so we do it carefull
   if (value === null || value === undefined) return [] as unknown as T;
   if (typeof value === "string") {
     try { return JSON.parse(value) as T; } catch { return value as unknown as T; }
@@ -36,6 +38,7 @@ function parseJsonField<T>(value: any): T {
 }
 
 export function parseProfile(profile: any) {
+  // fixing up the profle dta becase db can b wierd
   if (!profile) return null;
   return {
     ...profile,

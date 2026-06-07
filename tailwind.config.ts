@@ -2,6 +2,7 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   darkMode: "class",
+  // we ar usign class 4 dark mode coz it works good
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -26,6 +27,7 @@ const config: Config = {
         },
 
         // ── Stripe Modern palette ─────────────────────────────────
+        // im adding strpie moden plalette cz it looks profrasional 
         sm: {
           primary:      "#d97706",
           secondary:    "#16140F",
@@ -110,6 +112,7 @@ const config: Config = {
       },
 
       // ── Shadows ────────────────────────────────────────────────────
+      // shaddow for makin the thins pop out more
       boxShadow: {
         "sm-card":    "0 0 0 1px rgba(22,20,15,0.04)",
         "sm-card-lg": "0 8px 30px rgba(22,20,15,0.06)",

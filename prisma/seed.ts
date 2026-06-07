@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import { mockProfiles } from "../src/data/mockProfiles";
 
 const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL;
+// we ned datbse strngs for conectin to the psql
 
 if (!connectionString) {
   throw new Error("Set DIRECT_URL or DATABASE_URL before running the seed script.");
@@ -15,6 +16,7 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log("Start seeding...");
+  // strating the seed hear we will dlete old datas first
 
   await prisma.matchNote.deleteMany();
   await prisma.activityUpdate.deleteMany();
@@ -73,6 +75,7 @@ async function main() {
   }
 
   console.log(`Creating ${profilesData.length} profiles...`);
+  // makin lots of profiels in the db 
   await prisma.customerProfile.createMany({
     data: profilesData,
     skipDuplicates: true,
