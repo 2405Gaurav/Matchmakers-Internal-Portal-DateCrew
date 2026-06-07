@@ -63,7 +63,7 @@ export function Sidebar() {
         {/* The top section with our logo and brand name */}
         <div className="flex h-16 items-center px-5 border-b border-border">
           <div className="flex items-center gap-3">
-            <Logo className="h-8 w-auto text-foreground" />
+            <Logo className="h-8 w-auto text-foreground" iconOnly={!isExpanded} />
           </div>
         </div>
 

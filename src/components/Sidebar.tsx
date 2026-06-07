@@ -71,7 +71,7 @@ export function Sidebar() {
               <Logo className="h-8 w-auto text-foreground" />
             </motion.div>
           ) : (
-            <Logo className="h-8 w-auto mx-auto text-foreground" />
+            <Logo className="h-8 w-auto mx-auto text-foreground" iconOnly />
           )}
 
           {!isSidebarCollapsed && (
