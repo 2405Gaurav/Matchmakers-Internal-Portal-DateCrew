@@ -62,29 +62,7 @@ export function Sidebar() {
         {/* The top section with our logo and brand name */}
         <div className="flex h-16 items-center px-5 border-b border-border">
           <div className="flex items-center gap-3">
-            {/* Our signature Heart icon */}
-            <div className="flex items-center justify-center w-9 h-9 rounded-full bg-sm-primary shrink-0 transition-all duration-300">
-              <Heart className="w-4 h-4 text-white fill-white" />
-            </div>
-            {/* Only show the text if we have space (expanded) */}
-            <AnimatePresence>
-              {isExpanded && (
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex flex-col"
-                >
-                  <span className="font-display text-[17px] font-normal text-foreground tracking-tight whitespace-nowrap">
-                    The Date Crew
-                  </span>
-                  <span className="text-[11px] text-foreground/45 uppercase tracking-widest leading-none mt-0.5">
-                    Matchmaker
-                  </span>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <img src="https://cdn.prod.website-files.com/673e1a80860f50c64038afa6/690c01e8a7ef61abdc9353ba_Frame%201.svg" alt="The Date Crew Logo" className="h-8" />
           </div>
         </div>
 

@@ -67,17 +67,10 @@ export function Sidebar() {
               transition={{ delay: 0.1 }}
               className="flex items-center gap-2"
             >
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-600 shadow-glow">
-                <Heart className="w-4 h-4 text-white fill-white" />
-              </div>
-              <span className="font-semibold text-lg bg-gradient-to-r from-purple-500 to-indigo-400 bg-clip-text text-transparent">
-                The Date Crew
-              </span>
+              <img src="https://cdn.prod.website-files.com/673e1a80860f50c64038afa6/690c01e8a7ef61abdc9353ba_Frame%201.svg" alt="The Date Crew Logo" className="h-8" />
             </motion.div>
           ) : (
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-600 shadow-glow mx-auto">
-              <Heart className="w-4 h-4 text-white fill-white" />
-            </div>
+            <img src="https://cdn.prod.website-files.com/673e1a80860f50c64038afa6/690c01e8a7ef61abdc9353ba_Frame%201.svg" alt="The Date Crew Logo" className="h-8 mx-auto" />
           )}
 
           {!isSidebarCollapsed && (

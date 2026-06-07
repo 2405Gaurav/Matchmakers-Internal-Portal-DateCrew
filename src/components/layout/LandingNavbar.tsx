@@ -46,16 +46,7 @@ export function LandingNavbar() {
 
             {/* --- Left: Logo + Brand --- */}
             <Link href="/" className="flex items-center gap-2.5 group select-none shrink-0">
-              <motion.div
-                whileHover={{ scale: 1.08 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-500"
-              >
-                <Heart className="w-3.5 h-3.5 text-white fill-white" />
-              </motion.div>
-              <span className="font-display text-[18px] text-foreground tracking-tight whitespace-nowrap hidden sm:block transition-colors duration-300">
-                The Date Crew
-              </span>
+              <img src="https://cdn.prod.website-files.com/673e1a80860f50c64038afa6/690c01e8a7ef61abdc9353ba_Frame%201.svg" alt="The Date Crew Logo" className="h-8" />
             </Link>
 
 

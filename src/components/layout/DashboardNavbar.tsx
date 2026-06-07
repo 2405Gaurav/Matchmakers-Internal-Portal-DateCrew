@@ -81,10 +81,10 @@ export function DashboardNavbar() {
         {/* Breadcrumb trail so users always know where they are */}
         <div className="flex items-center gap-1.5 text-[13px] text-foreground/45 select-none transition-colors duration-300">
           <span
-            className="hover:text-foreground cursor-pointer transition-colors font-light"
+            className="hover:text-foreground cursor-pointer transition-colors font-light flex items-center"
             onClick={() => router.push("/dashboard")}
           >
-            TDC
+            <img src="https://cdn.prod.website-files.com/673e1a80860f50c64038afa6/690c01e8a7ef61abdc9353ba_Frame%201.svg" alt="The Date Crew Logo" className="h-4" />
           </span>
           <ChevronRight className="w-3 h-3" />
           <span

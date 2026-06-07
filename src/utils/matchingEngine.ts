@@ -18,6 +18,7 @@ export function calculateCompatibilityScore(
         careerCompatibility: 0,
         relocationPreference: 0,
         languageMatch: 0,
+        heightCompatibility: 0,
       },
       explanation: "This match was skipped — TDC currently matches opposite-gender profiles only.",
       strengths: [],
@@ -26,12 +27,13 @@ export function calculateCompatibilityScore(
     };
   }
 
-  let valuesMatch = 0;         // max 20
-  let lifestyleMatch = 0;      // max 20
-  let familyGoals = 0;         // max 15
-  let careerCompatibility = 0; // max 15
-  let relocationPreference = 0;// max 15
-  let languageMatch = 0;       // max 15
+  let valuesMatch = 0;          // max 20
+  let lifestyleMatch = 0;       // max 15 (trimmed from 20, 5pts moved to height)
+  let familyGoals = 0;          // max 15
+  let careerCompatibility = 0;  // max 15
+  let relocationPreference = 0; // max 15
+  let languageMatch = 0;        // max 15
+  let heightCompatibility = 0;  // max 5 (new, carved out of lifestyle)
 
   const strengths: string[] = [];
   const concerns: string[] = [];
@@ -57,15 +59,16 @@ export function calculateCompatibilityScore(
     );
   }
 
-  // --- 2. Lifestyle Match (max 20pts) ---
+  // --- 2. Lifestyle Match (max 15pts, was 20 before) ---
   // diet, drinking, smoking — small things that become big after marraige
+  // trimmed slightly to make room for height scoring, priorities adjusted
 
-  // diet (max 8pts)
+  // diet (max 6pts, was 8)
   const dietA = profileA.preferences.lifestyleChoices.diet;
   const dietB = profileB.preferences.lifestyleChoices.diet;
 
   if (dietA === dietB) {
-    lifestyleMatch += 8;
+    lifestyleMatch += 6;
     strengths.push(
       `Aligned dietary preferences: Both are ${dietA === "veg" ? "Vegetarian" : dietA}.`
     );
@@ -74,40 +77,40 @@ export function calculateCompatibilityScore(
     (dietA === "non-veg" && dietB === "veg")
   ) {
     // hard clash, shared kitchen becomes a problem
-    lifestyleMatch += 3;
+    lifestyleMatch += 2;
     concerns.push(
       `Dietary difference: ${profileA.firstName} is ${dietA} and ${profileB.firstName} is ${dietB}. Could be a source of daily friction.`
     );
   } else {
     // eggetarian or pescatarian in the mix, manageable
-    lifestyleMatch += 5;
+    lifestyleMatch += 4;
   }
 
-  // drinking (max 6pts)
+  // drinking (max 5pts, was 6)
   const drinkA = profileA.preferences.lifestyleChoices.drinking;
   const drinkB = profileB.preferences.lifestyleChoices.drinking;
 
   if (drinkA === drinkB) {
-    lifestyleMatch += 6;
+    lifestyleMatch += 5;
   } else if (
     (drinkA === "never" && drinkB === "regularly") ||
     (drinkA === "regularly" && drinkB === "never")
   ) {
-    lifestyleMatch += 2;
+    lifestyleMatch += 1;
     concerns.push(
       `Different drinking habits: ${profileA.firstName} drinks ${drinkA}, ${profileB.firstName} drinks ${drinkB}. Worth a candid chat.`
     );
   } else {
     // one occasional one regular, not ideal but workable
-    lifestyleMatch += 4;
+    lifestyleMatch += 3;
   }
 
-  // smoking (max 6pts)
+  // smoking (max 4pts, was 6)
   const smokeA = profileA.preferences.lifestyleChoices.smoking;
   const smokeB = profileB.preferences.lifestyleChoices.smoking;
 
   if (smokeA === smokeB) {
-    lifestyleMatch += 6;
+    lifestyleMatch += 4;
     if (smokeA === "never") {
       strengths.push("Both are non-smokers — great for a healthy shared environment.");
     }
@@ -121,7 +124,7 @@ export function calculateCompatibilityScore(
       "Smoking habit mismatch: One partner smokes regularly while the other doesn't. This often becomes a recurring point of tension."
     );
   } else {
-    lifestyleMatch += 3;
+    lifestyleMatch += 2;
   }
 
   // --- 3. Family Goals (max 15pts) ---
@@ -259,13 +262,39 @@ export function calculateCompatibilityScore(
     );
   }
 
-  // note: removed height check (female taller than male) that was in old code
-  // it was just a sterotype, has no real effect on compatibilty
-  // if user wants height filter let them do it from search filters not here
+  // --- 7. Height Compatibility (max 5pts) ---
+  // height is a real filter people use in indian matrimonial, shaadi.com etc all have it
+  // we dont have preferredHeightMin/Max in the profile type so working with actual heights
+  // logic: figure out who is male/female, check if the gap is in a reasonable range
+  // no preferredHeightMin/Max in types rn, can add later if needed — this is a good starting point
+  const maleHeight = profileA.gender === "Male" ? profileA.height : profileB.height;
+  const femaleHeight = profileA.gender === "Male" ? profileB.height : profileA.height;
+  const heightDiff = maleHeight - femaleHeight; // positive = male taller, negative = female taller
+
+  if (heightDiff >= 0 && heightDiff <= 15) {
+    // male taller by up to 15cm, ideal range
+    heightCompatibility += 5;
+    strengths.push(`Good height pairing: ${maleHeight}cm and ${femaleHeight}cm — comfortable match.`);
+  } else if (heightDiff > 15 && heightDiff <= 25) {
+    // male quite a bit taller, still fine just noticable
+    heightCompatibility += 3;
+  } else if (heightDiff < 0 && heightDiff >= -5) {
+    // female slightly taller, common enough, not a big deal
+    heightCompatibility += 3;
+  } else if (heightDiff < -5) {
+    // female noticeably taller, flagged as a preference concern not a dealbreaker
+    heightCompatibility += 1;
+    concerns.push(
+      `Height difference: ${profileB.firstName} is taller by ${Math.abs(heightDiff)}cm. May be a preference factor worth discussing.`
+    );
+  } else {
+    // very large gap (male 25cm+ taller), unusual but not scored as concern
+    heightCompatibility += 2;
+  }
 
   // final score, clamped 0-100
-  // max possible: 20 + 20 + 15 + 15 + 15 + 15 = 100
-  let score = valuesMatch + lifestyleMatch + familyGoals + careerCompatibility + relocationPreference + languageMatch;
+  // max possible: 20 + 15 + 15 + 15 + 15 + 15 + 5 = 100
+  let score = valuesMatch + lifestyleMatch + familyGoals + careerCompatibility + relocationPreference + languageMatch + heightCompatibility;
   score = Math.max(0, Math.min(100, score));
 
   // explanation string passed to gemini/ai layer for enrichment
@@ -296,7 +325,8 @@ export function calculateCompatibilityScore(
       familyGoals,
       careerCompatibility,
       relocationPreference,
-      languageMatch
+      languageMatch,
+      heightCompatibility,
     },
     explanation,
     strengths,

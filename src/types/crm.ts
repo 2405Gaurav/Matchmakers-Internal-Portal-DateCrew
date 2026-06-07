@@ -41,6 +41,7 @@ export interface CustomerPreferences {
   preferredAgeRange: { min: number; max: number };
   preferredLocation: string[];
   lifestyleChoices: LifestylePreferences;
+  // future: add preferredHeightMin / preferredHeightMax here if users want custom height filters
 }
 
 export interface FamilyInfo {
@@ -99,12 +100,13 @@ export interface ActivityUpdate {
 export interface CompatibilityReport {
   score: number;
   breakdown: {
-    valuesMatch: number;      // max 20
-    lifestyleMatch: number;   // max 20
-    familyGoals: number;      // max 15
-    careerCompatibility: number; // max 15
-    relocationPreference: number; // max 15
-    languageMatch: number;    // max 15
+    valuesMatch: number;           // max 20
+    lifestyleMatch: number;        // max 15
+    familyGoals: number;           // max 15
+    careerCompatibility: number;   // max 15
+    relocationPreference: number;  // max 15
+    languageMatch: number;         // max 15
+    heightCompatibility: number;   // max 5
   };
   explanation: string;
   strengths: string[];
